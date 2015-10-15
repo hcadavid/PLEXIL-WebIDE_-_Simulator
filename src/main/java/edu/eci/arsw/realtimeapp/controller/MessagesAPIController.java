@@ -1,6 +1,8 @@
 package edu.eci.arsw.realtimeapp.controller;
 
+import edu.eci.arsw.realtimeapp.model.Command;
 import edu.eci.arsw.realtimeapp.model.Message;
+import edu.eci.arsw.realtimeapp.model.RobotEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,29 +32,35 @@ public class MessagesAPIController {
     public MessagesAPIController(){
         new Thread(){
             public void run(){
-                while (true){
+                while (true) {
                     System.out.println("Message send attempt...");
                     try {
                         Thread.sleep(5000);
+                        if (template != null) {
+                            template.convertAndSend("/topic/newmessage", new Command("38"));
+                            Thread.sleep(1000);
+                            template.convertAndSend("/topic/newmessage", new Command("83"));
+
+                        }
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    if (template!=null){
-                        template.convertAndSend("/topic/newmessage",new Message("me", "hello"));
-                    }
+
                     
                 }
             }            
         }.start();
     }
     
-    @RequestMapping(method = RequestMethod.POST)        
-    public ResponseEntity<?> addProduct(@RequestBody Message p) {       
-        template.convertAndSend("/topic/newmessage",p);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
         
     
+    /*@MessageMapping("/rutaMensajesEntrantes") 
+    public void webSocketMsgHandler(RobotEvent m) {
+     System.out.println(">>>>>>"+m);
+    }*/
+    
+    
+        
     @MessageMapping("/rutaMensajesEntrantes") 
     public void webSocketMsgHandler(Message m) {
      System.out.println(">>>>>>"+m);

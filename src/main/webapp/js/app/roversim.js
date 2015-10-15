@@ -29,29 +29,29 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
 var game = {
     'rover_commands':function(code)
     {
-        if (code == 37)
+        if (code === "37")
         {
             steering_angle = steering_angle + min_rotation_unit;
         }
         //up
-        if (code == 38)
+        if (code === "38")
         {
-
-            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': 'acuse de recibo'});
+            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'acuse de recibo' }); 
+            //var jsonstr = JSON.stringify({'name': 'position', 'value': '33'});            
             stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
-            //stompClient.send("/ws/status", 'test!');
+            
             car.gear = 1;
             car.start_engine();
         }
 
         //right
-        if (code == 39)
+        if (code === "39")
         {
             steering_angle = steering_angle - min_rotation_unit;
         }
 
         //down
-        if (code == 40)
+        if (code === "40")
         {
             car.gear = -1;
             car.start_engine();
@@ -59,19 +59,19 @@ var game = {
 
 
         //A
-        if (code == 65)
+        if (code === "65")
         {
             rear_steering_angle = rear_steering_angle - min_rotation_unit;
         }
 
         //D
-        if (code == 68)
+        if (code === "68")
         {
             rear_steering_angle = rear_steering_angle + min_rotation_unit;
         }
 
         //S: STOP
-        if (code == 83)
+        if (code === "83")
         {
             car.stop_engine();
         }        
@@ -90,11 +90,9 @@ var game = {
         }
         //up
         if (code == 38)
-        {
-
-            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': 'acuse de recibo'});
+        {            
+            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'acuse de recibo' }); 
             stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
-            //stompClient.send("/ws/status", 'test!');
             car.gear = 1;
             car.start_engine();
         }
@@ -507,7 +505,9 @@ var connectCallback = function () {
     stompClient.subscribe('/topic/newmessage',
             function (data) {
                 console.log("got:" + data);
-                game.rover_commands(38);
+                var message=JSON.parse(data.body);                
+                game.rover_commands(message.commandCode);
+                
                 //var message = JSON.parse(data.body);
                 //console.log("got:" + message.destiny + "," + message.body);
             }
