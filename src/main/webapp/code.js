@@ -31,9 +31,7 @@ var game = {
         //left
         if(code == 37)
         {
-            //steering_angle = max_steer_angle;
             steering_angle = steering_angle + min_rotation_unit;
-            //steer_speed = 1.0;
         }
         //up
         if(code == 38)
@@ -45,9 +43,7 @@ var game = {
         //right
         if(code == 39)
         {
-            //steering_angle = -1 * max_steer_angle;
             steering_angle = steering_angle - min_rotation_unit;
-            //steer_speed = 1.0;
         }
          
         //down
@@ -62,16 +58,12 @@ var game = {
         if(code == 65)
         {
             rear_steering_angle = rear_steering_angle - min_rotation_unit;
-            //rear_steering_angle = -1 * max_steer_angle;
-            //steer_speed = 1.0;
         }
 
         //D
         if(code == 68)
         {
             rear_steering_angle = rear_steering_angle + min_rotation_unit;
-            //rear_steering_angle =  max_steer_angle;
-            //steer_speed = 1.0;
         }
 
         //S: STOP
@@ -86,120 +78,11 @@ var game = {
     'key_up' : function(e)
     {
         var code = e.keyCode;
-         
-        //stop forward velocity only when up or down key is released
-        /*if(code == 38 || code == 40)
-        {
-            car.stop_engine();
-        }*/
         
-
-        /*//A OR D
-        if(code == 65 || code == 68)
-        {
-            rear_steering_angle = 0.0;
-            //This is called POWER STEERING, when the steering is released the front wheels need to become straight very quickly
-            steer_speed = 8.0;
-        }*/
-
-        //LEFT OR RIGHT
-        /*if(code == 37 || code == 39)
-        {
-            steering_angle = 0.0;
-            //This is called POWER STEERING, when the steering is released the front wheels need to become straight very quickly
-            steer_speed = 8.0;
-        }*/
+        //key-release events
+        
     } ,
      
-/////
-        'key_down_f' : function(e)
-            {
-                var code = e;
-
-                //left
-                if(code == 37)
-                {
-                    //steering_angle = max_steer_angle;
-                    steering_angle = steering_angle + min_rotation_unit;
-                    //steer_speed = 1.0;
-                }
-                //up
-                if(code == 38)
-                {
-                    car.gear = 1;
-                    car.start_engine();
-                }
-                 
-                //right
-                if(code == 39)
-                {
-                    //steering_angle = -1 * max_steer_angle;
-                    steering_angle = steering_angle - min_rotation_unit;
-                    //steer_speed = 1.0;
-                }
-                 
-                //down
-                if(code == 40)
-                {
-                    car.gear = -1;
-                    car.start_engine();
-                }
-
-
-                //A
-                if(code == 65)
-                {
-                    rear_steering_angle = rear_steering_angle - min_rotation_unit;
-                    //rear_steering_angle = -1 * max_steer_angle;
-                    //steer_speed = 1.0;
-                }
-
-                //D
-                if(code == 68)
-                {
-                    rear_steering_angle = rear_steering_angle + min_rotation_unit;
-                    //rear_steering_angle =  max_steer_angle;
-                    //steer_speed = 1.0;
-                }
-
-
-
-            } ,
-             
-            'key_up_f' : function(e)
-            {
-                var code = e;
-                 
-                //stop forward velocity only when up or down key is released
-                //if(code == 38 || code == 40)
-                //{
-                //    car.stop_engine();
-                //}
-                
-
-                /*//A OR D
-                if(code == 65 || code == 68)
-                {
-                    rear_steering_angle = 0.0;
-                    //This is called POWER STEERING, when the steering is released the front wheels need to become straight very quickly
-                    steer_speed = 8.0;
-                }*/
-
-                //LEFT OR RIGHT
-                /*if(code == 37 || code == 39)
-                {
-                    steering_angle = 0.0;
-                    //This is called POWER STEERING, when the steering is released the front wheels need to become straight very quickly
-                    steer_speed = 8.0;
-                }*/
-            } ,
-
-
-////
-
-
-
-
     'screen_width' : 0 ,
     'screen_height' : 0 ,
 };
