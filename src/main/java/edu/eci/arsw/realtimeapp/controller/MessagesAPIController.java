@@ -4,6 +4,7 @@ import edu.eci.arsw.realtimeapp.model.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,13 @@ public class MessagesAPIController {
         template.convertAndSend("/topic/newmessage",p);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
+        
+    
+    @MessageMapping("/rutaMensajesEntrantes") 
+    public void webSocketMsgHandler(Message m) {
+     System.out.println(">>>>>>"+m);
+    }
+    
     
     @RequestMapping(value = "/check",method = RequestMethod.GET)        
     public String check() {        

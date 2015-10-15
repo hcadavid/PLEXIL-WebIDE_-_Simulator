@@ -13,7 +13,7 @@
 
   <context:component-scan base-package="edu.eci.arsw.realtimeapp.controller" />
 
-  <websocket:message-broker>
+  <websocket:message-broker application-destination-prefix="/app">
     <websocket:stomp-endpoint path="/ws">
       <websocket:sockjs/>
     </websocket:stomp-endpoint>

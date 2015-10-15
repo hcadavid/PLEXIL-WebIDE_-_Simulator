@@ -1,3 +1,28 @@
+
+
+    var socket = new SockJS("/roversim/sockets/ws");
+    var stompClient = Stomp.over(socket);
+
+    // Callback function to be called when stomp client is connected to server
+    var connectCallback = function () {
+        stompClient.subscribe('/topic/newmessage',
+                function (data) {
+                    console.log("got:" + data);
+                    var message = JSON.parse(data.body);
+                    console.log("got:" + message.destiny + "," + message.body);
+                }
+        );
+    };
+
+    // Callback function to be called when stomp client could not connect to server
+    var errorCallback = function (error) {
+        alert(error.headers.message);
+    };
+
+    // Connect to server via websocket
+    stompClient.connect("guest", "guest", connectCallback, errorCallback);
+
+
 /*
     Racing car example
     Silver Moon (m00n.silv3r@gmail.com)
@@ -36,6 +61,10 @@ var game = {
         //up
         if(code == 38)
         {
+            
+            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'acuse de recibo' }); 
+            stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
+            //stompClient.send("/ws/status", 'test!');
             car.gear = 1;
             car.start_engine();
         }
