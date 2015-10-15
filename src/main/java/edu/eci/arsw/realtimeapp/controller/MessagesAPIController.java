@@ -1,6 +1,8 @@
 package edu.eci.arsw.realtimeapp.controller;
 
 import edu.eci.arsw.realtimeapp.model.Message;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/messages")
 public class MessagesAPIController {
     
+
+    
     
     @Autowired 
     private SimpMessagingTemplate template;  
+    
+    public MessagesAPIController(){
+        new Thread(){
+            public void run(){
+                while (true){
+                    System.out.println("Message send attempt...");
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if (template!=null){
+                        template.convertAndSend("/topic/newmessage",new Message("me", "hello"));
+                    }
+                    
+                }
+            }            
+        }.start();
+    }
     
     @RequestMapping(method = RequestMethod.POST)        
     public ResponseEntity<?> addProduct(@RequestBody Message p) {       
