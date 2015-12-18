@@ -29,12 +29,127 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
 var game = {
     'rover_commands':function(code)
     {
-        if (code === "37")
+        
+        if (code === "m")
         {
-            steering_angle = steering_angle + min_rotation_unit;
+            steering_angle = -30*(180/Math.PI);        
         }
+        if (code === "n")
+        {
+            steering_angle = -20*(180/Math.PI);        
+        }
+        if (code === "o")
+        {
+            steering_angle = -10*(180/Math.PI);        
+        }
+        if (code === "p")
+        {
+            steering_angle = 0;        
+        }
+        if (code === "q")
+        {
+            steering_angle = 10*(180/Math.PI);        
+        }
+        if (code === "r")
+        {
+            steering_angle = 20*(180/Math.PI);        
+        }
+        if (code === "s")
+        {
+            steering_angle = 30*(180/Math.PI);        
+        }
+        
+        
+        //0: STOP
+        if (code === "0")
+        {
+            car.stop_engine();
+        }        
+        
+        if (code === "a")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(20);            
+        }
+        if (code === "b")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(40);            
+        }
+        if (code === "c")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(60);            
+        }
+        if (code === "d")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(80);            
+        }
+        if (code === "e")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(100);            
+        }
+
+        if (code === "a")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(20);            
+        }
+        if (code === "b")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(40);            
+        }
+        if (code === "c")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(60);            
+        }
+        if (code === "d")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(80);            
+        }
+        if (code === "e")
+        {
+            car.gear = 1;
+            car.start_engine_at_power(100);            
+        }        
+
+        
+        //backwards
+        if (code === "f")
+        {
+            car.gear = -1;
+            car.start_engine_at_power(20);            
+        }
+        if (code === "g")
+        {
+            car.gear = -1;
+            car.start_engine_at_power(40);            
+        }
+        if (code === "h")
+        {
+            car.gear = -1;
+            car.start_engine_at_power(60);            
+        }
+        if (code === "i")
+        {
+            car.gear = -1;
+            car.start_engine_at_power(80);            
+        }
+        if (code === "j")
+        {
+            car.gear = -1;
+            car.start_engine_at_power(100);            
+        }
+        
+        
         //up
-        if (code === "38")
+        
+        /*if (code === "38")
         {
             var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'acuse de recibo' }); 
             //var jsonstr = JSON.stringify({'name': 'position', 'value': '33'});            
@@ -42,102 +157,9 @@ var game = {
             
             car.gear = 1;
             car.start_engine();
-        }
+        }*/
 
-        //right
-        if (code === "39")
-        {
-            steering_angle = steering_angle - min_rotation_unit;
-        }
-
-        //down
-        if (code === "40")
-        {
-            car.gear = -1;
-            car.start_engine();
-        }
-
-
-        //A
-        if (code === "65")
-        {
-            rear_steering_angle = rear_steering_angle - min_rotation_unit;
-        }
-
-        //D
-        if (code === "68")
-        {
-            rear_steering_angle = rear_steering_angle + min_rotation_unit;
-        }
-
-        //S: STOP
-        if (code === "83")
-        {
-            car.stop_engine();
-        }        
-    },
-    
-    //keyboard events
-    'key_down': function (e)
-    {
-        var code = e.keyCode;
-
-
-        //left
-        if (code == 37)
-        {
-            steering_angle = steering_angle + min_rotation_unit;
-        }
-        //up
-        if (code == 38)
-        {            
-            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'acuse de recibo' }); 
-            stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
-            car.gear = 1;
-            car.start_engine();
-        }
-
-        //right
-        if (code == 39)
-        {
-            steering_angle = steering_angle - min_rotation_unit;
-        }
-
-        //down
-        if (code == 40)
-        {
-            car.gear = -1;
-            car.start_engine();
-        }
-
-
-        //A
-        if (code == 65)
-        {
-            rear_steering_angle = rear_steering_angle - min_rotation_unit;
-        }
-
-        //D
-        if (code == 68)
-        {
-            rear_steering_angle = rear_steering_angle + min_rotation_unit;
-        }
-
-        //S: STOP
-        if (code == 83)
-        {
-            car.stop_engine();
-        }
-
-
-    },
-    'key_up': function (e)
-    {
-        var code = e.keyCode;
-
-        //key-release events
-
-    },
+    },        
     'screen_width': 0,
     'screen_height': 0,
 };
@@ -164,6 +186,11 @@ var scale = 100;
 var car = {
     'top_engine_speed': 2.5,
     'engine_on': false,
+    'start_engine_at_power': function (powerpercent)
+    {
+        car.engine_on = true;
+        car.engine_speed = car.gear * (powerpercent*(car.top_engine_speed/100));
+    },
     'start_engine': function ()
     {
         car.engine_on = true;
@@ -327,17 +354,6 @@ $(function ()
      */
     //
 
-    $(document).keydown(function (e)
-    {
-        game.key_down(e);
-        return false;
-    });
-
-    $(document).keyup(function (e)
-    {
-        game.key_up(e);
-        return false;
-    });
 
     //Start the Game Loop!!!!!!!
     game_loop();

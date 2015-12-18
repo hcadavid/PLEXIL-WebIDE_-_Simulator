@@ -97,7 +97,7 @@ public class PlexilExecLauncher {
     }
 
     public static void main(String args[]) throws IOException {
-        Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess("/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/custom-plans/plan3.plx",
+        Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess("/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/eci-robotics-plans/CommandsExample.plx",
                 new CommandReceivedCallback() {
                     @Override
                     public void execute(String cmd) {
@@ -138,7 +138,7 @@ class ExecutiveInput extends Thread {
     public void run() {
         try {
             Thread.sleep(10000);
-            w.write("ws\n");
+            w.write("ws\n");            
             w.flush();
             System.out.println("Sending ws");
             Thread.sleep(10000);
