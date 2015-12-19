@@ -4,9 +4,11 @@
 
 
 /*
- Racing car example
- Silver Moon (m00n.silv3r@gmail.com)
+ Source code adapted by Hector Cadavid.
+ Original sources: Racing car example, author: Silver Moon (m00n.silv3r@gmail.com)
  */
+
+var randomIdentifier=Math.random().toString(36).slice(2);
 
 //Get the objects of Box2d Library
 var b2Vec2 = Box2D.Common.Math.b2Vec2
@@ -519,7 +521,7 @@ var stompClient = Stomp.over(socket);
 // Callback function to be called when stomp client is connected to server
 var connectCallback = function () {
     
-    stompClient.subscribe('/topic/command',
+    stompClient.subscribe('/topic/command/'+randomIdentifier,
             function (data) {
                 console.log("got:" + data);
                 var message=JSON.parse(data.body);                

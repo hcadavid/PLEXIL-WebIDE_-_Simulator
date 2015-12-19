@@ -108,11 +108,11 @@ public class MessagesAPIController {
         }
         try {
             PlexilCompiler.getInstance().compile(srcFile);
-            template.convertAndSend("/topic/command", new Command("a"));
+            template.convertAndSend("/topic/command/"+er.getClientSessionId(), new Command("a"));
             System.out.println("COMPILE OK");
         } catch (CompilationException ex) {
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/command", new Command("m"));
+            template.convertAndSend("/topic/command/"+er.getClientSessionId(), new Command("m"));
             System.out.println("COMPILE ERROR");
         }
         

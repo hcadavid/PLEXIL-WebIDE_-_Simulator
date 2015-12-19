@@ -33,7 +33,7 @@
                 stompClient.send("/app/compile", {}, jsonstr);
             };
             execute = function () {
-                var jsessionId = 'noid';
+                var jsessionId = randomIdentifier;
                 var source = editor.getValue();
                 var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'source': source});
                 stompClient.send("/app/execute", {}, jsonstr);
