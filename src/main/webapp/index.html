@@ -1,69 +1,99 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>Racing Car in Box2d</title>
-     
-    <script src="js/libs/jquery-1.9.0.min.js"></script>
-    <script src="js/libs/Box2dWeb-2.1.a.3.js"></script>    
-    <script src="js/libs/stomp.js"></script>
-    <script src="js/libs/sockjs-0.3.min.js"></script>
-    <script src="js/libs/ace/ace.js"></script>
-    <!--<script src="js/libs/websockmodule.js"></script>    -->
-    
-    
-    <script src="js/app/roversim.js"></script>
-    
-    <script>
-        compile=function(){
-            var source = editor.getValue();
-            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':source }); 
-            //stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);            
-            stompClient.send("/app/compile", {}, jsonstr);            
-        }
-        start=function(){            
-            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'a' }); 
-            stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);            
-        }
-        
-        stop=function(){            
-            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'0' }); 
-            stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);            
-        }
-        
-    </script>
+<!DOCTYPE html>
+<html>
+    <head>
 
-    <style type="text/css" media="screen">
-        #editor { 
-            position: relative;
-            width: 800px;
-            height: 400px;
-        }
-    </style>    
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <style type="text/css">
+            .bs-example{
+                margin: 20px;
+            }
+        </style>
 
-    
+        <script src="js/libs/Box2dWeb-2.1.a.3.js"></script>    
+        <script src="js/libs/stomp.js"></script>
+        <script src="js/libs/sockjs-0.3.min.js"></script>
+        <script src="js/libs/ace/ace.js"></script>
 
-    
-</head>
- 
-<body style="margin:0px;">
-    <canvas id="canvas" width='800' height='600' style="background-color:#333;"></canvas>
-    
-    <button onclick="compile()" >start</button>    
-    <button onclick="stop()" >stop</button>    
-        
-    <div id="editor">function foo(items) {
-    var x = "All this is syntax highlighted";
-    return x;
-    }
-    </div>
-    
-    <script>
-        var editor = ace.edit("editor");
-        editor.setTheme("ace/theme/monokai");
-        //editor.getSession().setMode("ace/mode/javascript");
-    </script>
-        
-    
-</body>
- 
+        <style type="text/css" media="screen">
+            #editor { 
+                position: relative;
+                width: 800px;
+                height: 600px;
+            }
+        </style> 
+
+        <script>
+            compile = function () {
+                var source = editor.getValue();
+                var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': source});
+                //stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);            
+                stompClient.send("/app/compile", {}, jsonstr);
+            };
+            execute = function () {
+                var jsessionId = 'noid';
+                var source = editor.getValue();
+                var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'source': source});
+                stompClient.send("/app/execute", {}, jsonstr);
+            };
+
+            start = function () {
+                var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': 'a'});
+                stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
+            };
+
+            stop = function () {
+                var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': '0'});
+                stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
+            };
+        </script>        
+
+
+    </head>
+    <body>
+
+
+
+
+        <div class="bs-example">
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#sectionA">Simulation</a></li>
+                <li><a data-toggle="tab" href="#sectionB">Plexil Plan</a></li>        
+            </ul>
+            <div class="tab-content">
+                <div id="sectionA" class="tab-pane fade in active">
+
+                    <canvas id="canvas" width='800' height='600' style="background-color:#333;"></canvas>
+
+                </div>
+                <div id="sectionB" class="tab-pane fade">
+                    <div id="editor">
+                        function foo(items){
+                        var x = "All this is syntax highlighted";
+                        return x;
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>  
+
+
+
+
+
+        <div style="position: relative; width: 800px ; height: 20px ">
+            <button onclick="execute()" >Execute</button>                
+        </div>
+
+        <script src="js/app/roversim.js"></script>    
+
+        <script>
+                var editor = ace.edit("editor");
+                editor.setTheme("ace/theme/twilight");
+        </script>
+
+    </body>
 </html>

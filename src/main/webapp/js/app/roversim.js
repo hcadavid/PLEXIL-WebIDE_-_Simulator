@@ -518,7 +518,8 @@ var stompClient = Stomp.over(socket);
 
 // Callback function to be called when stomp client is connected to server
 var connectCallback = function () {
-    stompClient.subscribe('/topic/newmessage',
+    
+    stompClient.subscribe('/topic/command',
             function (data) {
                 console.log("got:" + data);
                 var message=JSON.parse(data.body);                
@@ -528,6 +529,9 @@ var connectCallback = function () {
                 //console.log("got:" + message.destiny + "," + message.body);
             }
     );
+    
+    
+    
 };
 
 // Callback function to be called when stomp client could not connect to server

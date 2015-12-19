@@ -3,6 +3,7 @@ package edu.eci.arsw.realtimeapp.controller;
 import edu.eci.arsw.realtimeapp.interop.CompilationException;
 import edu.eci.arsw.realtimeapp.interop.PlexilCompiler;
 import edu.eci.arsw.realtimeapp.model.Command;
+import edu.eci.arsw.realtimeapp.model.ExecutionRequest;
 import edu.eci.arsw.realtimeapp.model.Message;
 import edu.eci.arsw.realtimeapp.model.RobotEvent;
 import java.io.FileNotFoundException;
@@ -93,6 +94,31 @@ public class MessagesAPIController {
     
     
     
+    @MessageMapping("/execute") 
+    public void execute(SimpMessageHeaderAccessor headerAccessor,ExecutionRequest er) {
+        System.out.println("GOT EXECUTE COMMAND FROM "+er.getClientSessionId());
+        String sessionId = headerAccessor.getSessionId(); // Session ID
+        String srcFile="/tmp/"+sessionId+System.currentTimeMillis()+".ple";
+        try {
+            PrintWriter out = new PrintWriter(srcFile);
+            out.write(er.getSource());
+            out.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            PlexilCompiler.getInstance().compile(srcFile);
+            template.convertAndSend("/topic/command", new Command("a"));
+            System.out.println("COMPILE OK");
+        } catch (CompilationException ex) {
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
+            template.convertAndSend("/topic/command", new Command("m"));
+            System.out.println("COMPILE ERROR");
+        }
+        
+    }
+
+    
     
     @MessageMapping("/compile") 
     public void compile(SimpMessageHeaderAccessor headerAccessor,Message m) {
@@ -107,11 +133,11 @@ public class MessagesAPIController {
         }
         try {
             PlexilCompiler.getInstance().compile(srcFile);
-            template.convertAndSend("/topic/newmessage", new Command("a"));
+            template.convertAndSend("/topic/command", new Command("a"));
             System.out.println("COMPILE OK");
         } catch (CompilationException ex) {
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/newmessage", new Command("b"));
+            template.convertAndSend("/topic/command", new Command("m"));
             System.out.println("COMPILE ERROR");
         }
         
