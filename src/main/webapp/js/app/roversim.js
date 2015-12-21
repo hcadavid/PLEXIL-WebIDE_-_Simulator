@@ -69,6 +69,45 @@ var game = {
         }
         
         
+        
+        if (code === "M")
+        {
+            rear_steering_angle = -30*(Math.PI/180);
+            console.log('steering angle:'+rear_steering_angle);
+        }
+        if (code === "N")
+        {
+            rear_steering_angle = -20*(Math.PI/180);
+            console.log('steering angle:'+rear_steering_angle);
+        }
+        if (code === "O")
+        {
+            rear_steering_angle = -10*(Math.PI/180);     
+            console.log('steering angle:'+rear_steering_angle);
+        }
+        if (code === "P")
+        {
+            rear_steering_angle = 0;        
+            console.log('steering angle:'+rear_steering_angle);
+        }
+        if (code === "Q")
+        {
+            rear_steering_angle = 10*(Math.PI/180);
+            console.log('steering angle:'+rear_steering_angle);
+        }
+        if (code === "R")
+        {
+            rear_steering_angle = 20*(Math.PI/180); 
+            console.log('steering angle:'+rear_steering_angle);
+        }
+        if (code === "S")
+        {
+            rear_steering_angle = 30*(Math.PI/180);
+            console.log('steering angle:'+rear_steering_angle);
+        }
+        
+        
+        
         //0: STOP
         if (code === "0")
         {
