@@ -34,31 +34,38 @@ var game = {
         
         if (code === "m")
         {
-            steering_angle = -30*(180/Math.PI);        
+            steering_angle = -30*(Math.PI/180);
+            console.log('steering angle:'+steering_angle);
         }
         if (code === "n")
         {
-            steering_angle = -20*(180/Math.PI);        
+            steering_angle = -20*(Math.PI/180);
+            console.log('steering angle:'+steering_angle);
         }
         if (code === "o")
         {
-            steering_angle = -10*(180/Math.PI);        
+            steering_angle = -10*(Math.PI/180);     
+            console.log('steering angle:'+steering_angle);
         }
         if (code === "p")
         {
             steering_angle = 0;        
+            console.log('steering angle:'+steering_angle);
         }
         if (code === "q")
         {
-            steering_angle = 10*(180/Math.PI);        
+            steering_angle = 10*(Math.PI/180);
+            console.log('steering angle:'+steering_angle);
         }
         if (code === "r")
         {
-            steering_angle = 20*(180/Math.PI);        
+            steering_angle = 20*(Math.PI/180); 
+            console.log('steering angle:'+steering_angle);
         }
         if (code === "s")
         {
-            steering_angle = 30*(180/Math.PI);        
+            steering_angle = 30*(Math.PI/180);
+            console.log('steering angle:'+steering_angle);
         }
         
         
