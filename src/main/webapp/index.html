@@ -6,11 +6,11 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-        <style type="text/css">
-            .bs-example{
-                margin: 20px;
-            }
-        </style>
+
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
 
         <script src="js/libs/Box2dWeb-2.1.a.3.js"></script>    
         <script src="js/libs/stomp.js"></script>
@@ -27,9 +27,9 @@
 
         <script>
             compile = function () {
+                var jsessionId = randomIdentifier;
                 var source = editor.getValue();
-                var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': source});
-                //stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);            
+                var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'source': source});
                 stompClient.send("/app/compile", {}, jsonstr);
             };
             execute = function () {
@@ -57,7 +57,7 @@
 
 
 
-        <div class="bs-example">
+        <div id="tabbed-pane" style="margin: 20px">
             <ul class="nav nav-tabs">
                 <li class="active"><a data-toggle="tab" href="#sectionA">Simulation</a></li>
                 <li><a data-toggle="tab" href="#sectionB">Plexil Plan</a></li>        
@@ -70,10 +70,14 @@
                 </div>
                 <div id="sectionB" class="tab-pane fade">
                     <div id="editor">
-                        function foo(items){
-                        var x = "All this is syntax highlighted";
-                        return x;
-                        }
+Command TurnFrontWheels(Integer);
+Command TurnRearWheels(Integer);
+Command MoveForward(Integer);
+Command MoveBackward(Integer);                        
+
+Node1:{
+
+}
                     </div>
 
                 </div>
@@ -82,18 +86,37 @@
 
 
 
+        <div id="errors" title="Error">
+            <p>
+                <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+                <span></span>
+
+            </p>
+        </div>        
 
 
-        <div style="position: relative; width: 800px ; height: 20px ">
+        <script>
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/twilight");
+
+            $('#errors').dialog({autoOpen: false});
+
+            showError = function (msg) {
+                $('#errors span').text(msg);
+                $('#errors').dialog('open');
+
+            };
+
+        </script>
+
+
+        <div style="text-align:center;">
+            <button onclick="compile()" >Compile</button>                
             <button onclick="execute()" >Execute</button>                
         </div>
 
         <script src="js/app/roversim.js"></script>    
 
-        <script>
-                var editor = ace.edit("editor");
-                editor.setTheme("ace/theme/twilight");
-        </script>
 
     </body>
 </html>

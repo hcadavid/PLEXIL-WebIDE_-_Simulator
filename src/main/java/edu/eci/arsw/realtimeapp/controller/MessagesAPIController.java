@@ -98,6 +98,7 @@ public class MessagesAPIController {
     public void execute(SimpMessageHeaderAccessor headerAccessor,ExecutionRequest er) {
         System.out.println("GOT EXECUTE COMMAND FROM "+er.getClientSessionId());
         String sessionId = headerAccessor.getSessionId(); // Session ID
+        //random file name
         String srcFile="/tmp/"+sessionId+System.currentTimeMillis()+".ple";
         try {
             PrintWriter out = new PrintWriter(srcFile);
@@ -108,12 +109,10 @@ public class MessagesAPIController {
         }
         try {
             PlexilCompiler.getInstance().compile(srcFile);
-            template.convertAndSend("/topic/command/"+er.getClientSessionId(), new Command("a"));
-            System.out.println("COMPILE OK");
-        } catch (CompilationException ex) {
+            /*Execution*/
+        } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/command/"+er.getClientSessionId(), new Command("m"));
-            System.out.println("COMPILE ERROR");
+            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage()));            
         }
         
     }
@@ -121,24 +120,24 @@ public class MessagesAPIController {
     
     
     @MessageMapping("/compile") 
-    public void compile(SimpMessageHeaderAccessor headerAccessor,Message m) {
+    public void compile(SimpMessageHeaderAccessor headerAccessor,ExecutionRequest er) {
+        System.out.println("GOT EXECUTE COMMAND FROM "+er.getClientSessionId());
         String sessionId = headerAccessor.getSessionId(); // Session ID
+        //random file name
         String srcFile="/tmp/"+sessionId+System.currentTimeMillis()+".ple";
         try {
             PrintWriter out = new PrintWriter(srcFile);
-            out.write(m.getBody());
+            out.write(er.getSource());
             out.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
             PlexilCompiler.getInstance().compile(srcFile);
-            template.convertAndSend("/topic/command", new Command("a"));
-            System.out.println("COMPILE OK");
-        } catch (CompilationException ex) {
+            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Compilation success."));            
+        } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/command", new Command("m"));
-            System.out.println("COMPILE ERROR");
+            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage()));            
         }
         
     }

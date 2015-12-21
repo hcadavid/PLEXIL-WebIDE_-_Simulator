@@ -532,7 +532,19 @@ var connectCallback = function () {
             }
     );
     
-    
+    stompClient.subscribe('/topic/messages/'+randomIdentifier,
+            function (data) {
+                console.log("got message:" + data);
+                var message=JSON.parse(data.body); 
+                
+                showError(message.body);                
+                
+                //game.rover_commands(message.commandCode);
+                
+                //var message = JSON.parse(data.body);
+                //console.log("got:" + message.destiny + "," + message.body);
+            }
+    );    
     
 };
 
