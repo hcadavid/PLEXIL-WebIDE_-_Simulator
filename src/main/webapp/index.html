@@ -69,13 +69,22 @@
                 </div>
                 <div id="sectionB" class="tab-pane fade">
                     <div id="editor" style="position: relative;width: 800px; height: 600px;">
+Command PlantSeed;
 Command TurnFrontWheels(Integer);
-Command TurnRearWheels(Integer);
-Command MoveForward(Integer);
-Command MoveBackward(Integer);                        
+Command TurnRearWheels(Integer); 
+Command MoveForward(Integer); 
+Command MoveBackward(Integer); 
 
-Node1:{
-
+CommandsTest:{
+    
+        TR:{
+            TurnFrontWheels(30);
+        }
+        
+        MF:{            
+            MoveForward(3);
+        }               
+   
 }
                     </div>
 
