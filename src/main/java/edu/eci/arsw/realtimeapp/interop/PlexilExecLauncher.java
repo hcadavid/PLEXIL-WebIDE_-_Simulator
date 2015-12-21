@@ -43,14 +43,26 @@ public class PlexilExecLauncher {
         return instance;
     }
 
-    public Process createPlanExecutionProcess(String planPath, 
+    /**
+     * 
+     * @param plexilHome
+     * @param interfaceConfigPath
+     * @param planPath
+     * @param cmdcb
+     * @param finishcb
+     * @param errorcb
+     * @return
+     * @throws IOException 
+     */
+    public Process createPlanExecutionProcess(String plexilHome,String interfaceConfigPath,String planPath, 
             final CommandReceivedCallback cmdcb,
             final FinishedPlanCallback finishcb, 
             final PlanExecutionFailureCallback errorcb) throws IOException {
         String cmd1 = "/bin/bash";
-        ProcessBuilder pb = new ProcessBuilder(cmd1, "-c", "$PLEXIL_HOME/scripts/plexilexec -p " + planPath + " -c /Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/interface-config.xml");
+        //ProcessBuilder pb = new ProcessBuilder(cmd1, "-c", "$PLEXIL_HOME/scripts/plexilexec -p " + planPath + " -c /Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/interface-config.xml");
+        ProcessBuilder pb = new ProcessBuilder(cmd1, "-c", "$PLEXIL_HOME/scripts/plexilexec -p " + planPath + " -c "+interfaceConfigPath);
         Map<String, String> env = pb.environment();
-        env.put("PLEXIL_HOME", "/Users/hcadavid/apps/plexil-4.0.1");
+        env.put("PLEXIL_HOME", plexilHome);
         final Process p = pb.start();
         
         final InputStream is = p.getInputStream();
@@ -97,7 +109,10 @@ public class PlexilExecLauncher {
     }
 
     public static void main(String args[]) throws IOException {
-        Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess("/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/eci-robotics-plans/CommandsExample.plx",
+        Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess("/Users/hcadavid/apps/plexil-4.0.1",
+                "/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/interface-config.xml",
+                "/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/eci-robotics-plans/CommandsExample.plx",
+                
                 new CommandReceivedCallback() {
                     @Override
                     public void execute(String cmd) {

@@ -115,8 +115,11 @@ public class MessagesAPIController {
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-            PlexilCompiler.getInstance().compile(srcFile);
-            Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess(compiledFile,
+            PlexilCompiler.getInstance().compile(env.getProperty("plexilhome"),srcFile);
+            Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess(
+                    env.getProperty("plexilhome"),
+                    env.getProperty("interfaceconfig"),
+                    compiledFile,
                     new CommandReceivedCallback() {
                         @Override
                         public void execute(String cmd) {
@@ -162,7 +165,7 @@ public class MessagesAPIController {
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-            PlexilCompiler.getInstance().compile(srcFile);
+            PlexilCompiler.getInstance().compile(env.getProperty("plexilhome"),srcFile);
             template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Compilation success."));            
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);

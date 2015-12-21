@@ -43,11 +43,11 @@ public class PlexilCompiler {
         return instance;
     }
 
-    public void compile(String planPath) throws CompilationException {
+    public void compile(String plexilHome,String planPath) throws CompilationException {
         String cmd1 = "/bin/bash";
         ProcessBuilder pb = new ProcessBuilder(cmd1, "-c", "$PLEXIL_HOME/scripts/plexilc " + planPath);
         Map<String, String> env = pb.environment();
-        env.put("PLEXIL_HOME", "/Users/hcadavid/apps/plexil-4.0.1");
+        env.put("PLEXIL_HOME", plexilHome);
         Process p;
         try {
             p = pb.start();
@@ -131,7 +131,7 @@ public class PlexilCompiler {
     }
 
     public static void main(String args[]) throws IOException, CompilationException {
-        PlexilCompiler.getInstance().compile("/tmp/CommandsExample.ple");
+        PlexilCompiler.getInstance().compile("/Users/hcadavid/apps/plexil-4.0.1","/tmp/CommandsExample.ple");
         System.out.println("done");
     }
 
