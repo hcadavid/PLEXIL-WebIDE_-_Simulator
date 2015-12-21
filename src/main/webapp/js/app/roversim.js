@@ -523,7 +523,7 @@ var connectCallback = function () {
     
     stompClient.subscribe('/topic/command/'+randomIdentifier,
             function (data) {
-                console.log("got:" + data);
+                console.log("GOT COMMAND:" + data);
                 var message=JSON.parse(data.body);                
                 game.rover_commands(message.commandCode);
                 
@@ -534,7 +534,7 @@ var connectCallback = function () {
     
     stompClient.subscribe('/topic/messages/'+randomIdentifier,
             function (data) {
-                console.log("got message:" + data);
+                //console.log("got message:" + data);
                 var message=JSON.parse(data.body); 
                 
                 showError(message.body);                

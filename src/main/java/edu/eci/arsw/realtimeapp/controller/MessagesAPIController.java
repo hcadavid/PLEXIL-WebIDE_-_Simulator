@@ -1,13 +1,18 @@
 package edu.eci.arsw.realtimeapp.controller;
 
+import edu.eci.arsw.realtimeapp.interop.CommandReceivedCallback;
 import edu.eci.arsw.realtimeapp.interop.CompilationException;
+import edu.eci.arsw.realtimeapp.interop.FinishedPlanCallback;
+import edu.eci.arsw.realtimeapp.interop.PlanExecutionFailureCallback;
 import edu.eci.arsw.realtimeapp.interop.PlexilCompiler;
+import edu.eci.arsw.realtimeapp.interop.PlexilExecLauncher;
 import edu.eci.arsw.realtimeapp.model.Command;
 import edu.eci.arsw.realtimeapp.model.ExecutionRequest;
 import edu.eci.arsw.realtimeapp.model.Message;
 import edu.eci.arsw.realtimeapp.model.RobotEvent;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
@@ -95,11 +100,13 @@ public class MessagesAPIController {
     
     
     @MessageMapping("/execute") 
-    public void execute(SimpMessageHeaderAccessor headerAccessor,ExecutionRequest er) {
+    public void execute(SimpMessageHeaderAccessor headerAccessor,final ExecutionRequest er) {
         System.out.println("GOT EXECUTE COMMAND FROM "+er.getClientSessionId());
-        String sessionId = headerAccessor.getSessionId(); // Session ID
+        final String sessionId = headerAccessor.getSessionId(); // Session ID
         //random file name
-        String srcFile="/tmp/"+sessionId+System.currentTimeMillis()+".ple";
+        String srcSuffix=sessionId+System.currentTimeMillis();
+        String srcFile="/tmp/"+srcSuffix+".ple";
+        String compiledFile="/tmp/"+srcSuffix+".plx";
         try {
             PrintWriter out = new PrintWriter(srcFile);
             out.write(er.getSource());
@@ -109,10 +116,32 @@ public class MessagesAPIController {
         }
         try {
             PlexilCompiler.getInstance().compile(srcFile);
+            Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess(compiledFile,
+                    new CommandReceivedCallback() {
+                        @Override
+                        public void execute(String cmd) {
+                            System.out.println("Sending command:" + cmd+" to /topic/command/"+er.getClientSessionId());                                   
+                            template.convertAndSend("/topic/command/"+er.getClientSessionId(), new Command(cmd));
+                        }
+                    },
+                    new FinishedPlanCallback() {
+                        @Override
+                        public void execute() {
+                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution success."));            
+                        }
+                    },
+                    new PlanExecutionFailureCallback() {
+                        @Override
+                        public void execute(String msg) {
+                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg));            
+                        }
+                    });
             /*Execution*/
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
             template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage()));            
+        } catch (IOException ex) {
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }

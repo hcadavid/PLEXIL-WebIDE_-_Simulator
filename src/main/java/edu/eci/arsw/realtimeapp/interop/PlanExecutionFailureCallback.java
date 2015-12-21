@@ -22,6 +22,6 @@ package edu.eci.arsw.realtimeapp.interop;
  */
 public interface PlanExecutionFailureCallback {
     
-    public void execute();
+    public void execute(String msg);
     
 }

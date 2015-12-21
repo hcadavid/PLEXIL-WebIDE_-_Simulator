@@ -17,14 +17,6 @@
         <script src="js/libs/sockjs-0.3.min.js"></script>
         <script src="js/libs/ace/ace.js"></script>
 
-        <style type="text/css" media="screen">
-            #editor { 
-                position: relative;
-                width: 800px;
-                height: 600px;
-            }
-        </style> 
-
         <script>
             compile = function () {
                 var jsessionId = randomIdentifier;
@@ -55,7 +47,14 @@
     <body>
 
 
-
+        <div class="page-header">
+            <div class="container">
+                <div class="row-fluid">
+                    <h1>Plexil-based Automation programming platform</h1>
+                    <h4>H&eacute;ctor Fabio Cadavid R. - Escuela Colombiana de Ingenier&iacute;a - hector.cadavid@escuelaing.edu.co</h4>
+                </div>
+            </div>
+        </div>
 
         <div id="tabbed-pane" style="margin: 20px">
             <ul class="nav nav-tabs">
@@ -69,7 +68,7 @@
 
                 </div>
                 <div id="sectionB" class="tab-pane fade">
-                    <div id="editor">
+                    <div id="editor" style="position: relative;width: 800px; height: 600px;">
 Command TurnFrontWheels(Integer);
 Command TurnRearWheels(Integer);
 Command MoveForward(Integer);
@@ -104,7 +103,6 @@ Node1:{
             showError = function (msg) {
                 $('#errors span').text(msg);
                 $('#errors').dialog('open');
-
             };
 
         </script>

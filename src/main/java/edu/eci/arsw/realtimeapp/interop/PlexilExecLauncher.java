@@ -66,7 +66,7 @@ public class PlexilExecLauncher {
                     if (r == 0) { // No error
                         finishcb.execute();
                     } else { //error
-                        errorcb.execute();
+                        errorcb.execute("Non-success return code:"+r);
                     }
                 } catch (InterruptedException ex) {
                     Logger.getLogger(PlexilExecLauncher.class.getName()).log(Level.SEVERE, null, ex);
@@ -82,7 +82,7 @@ public class PlexilExecLauncher {
                     String line=null;
                     while ((line = br.readLine()) != null) {
                         if (line.startsWith("[CMD]")) {
-                            cmdcb.execute(line);
+                            cmdcb.execute(line.substring(5).trim());
                         }                        
                     }
                 } catch (IOException ex) {
@@ -112,8 +112,8 @@ public class PlexilExecLauncher {
                 },
                 new PlanExecutionFailureCallback() {
                     @Override
-                    public void execute() {
-                        System.out.println("Plan error!");
+                    public void execute(String msg) {
+                        System.out.println("Plan error."+msg);
                     }
                 });
 
