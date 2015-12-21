@@ -69,15 +69,26 @@
                 </div>
                 <div id="sectionB" class="tab-pane fade">
                     <div id="editor" style="position: relative;width: 800px; height: 600px;">
-Command PlantSeed;
+
+
+//Set front wheels angle [-30..30]
 Command TurnFrontWheels(Integer);
+
+//Set rear wheels angle [-30..30]
 Command TurnRearWheels(Integer); 
+
+//Move forward with a given power level [0..100]
 Command MoveForward(Integer); 
+
+//Move backwards with a given power level [0..100]
 Command MoveBackward(Integer); 
+
+//Stop
+Command StopEngine()
 
 CommandsTest:{
     
-        TR:{
+        TF:{
             TurnFrontWheels(30);
         }
         
