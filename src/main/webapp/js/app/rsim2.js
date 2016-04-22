@@ -4,16 +4,10 @@
 
 
 /*
- Source code adapted by Hector Cadavid.
- Original sources: Racing car example, author: Silver Moon (m00n.silv3r@gmail.com)
+ Racing car example
+ Silver Moon (m00n.silv3r@gmail.com)
  */
-
 var randomIdentifier=Math.random().toString(36).slice(2);
-var carxpos=3;
-var carypos=3;
-
-
-
 //Get the objects of Box2d Library
 var b2Vec2 = Box2D.Common.Math.b2Vec2
         , b2AABB = Box2D.Collision.b2AABB
@@ -30,186 +24,17 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
         , b2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
         , b2Joint = Box2D.Dynamics.Joints.b2Joint
         , b2PrismaticJointDef = Box2D.Dynamics.Joints.b2PrismaticJointDef
-        ,      b2RayCastInput = Box2D.Collision.b2RayCastInput
-        ,      b2RayCastOutput = Box2D.Collision.b2RayCastOutput
         ;
-
-var car_raycast_origin = new b2Vec2( 0,0);
-var car_raycast_destiny = new b2Vec2();
-var car_raycast_intersectionPoint=new b2Vec2();
-
-
 
 var game = {
     'rover_commands':function(code)
     {
-        
-        if (code === "m")
+        if (code === "37")
         {
-            steering_angle = -30*(Math.PI/180);
-            console.log('steering angle:'+steering_angle);
+            steering_angle = steering_angle + min_rotation_unit;
         }
-        if (code === "n")
-        {
-            steering_angle = -20*(Math.PI/180);
-            console.log('steering angle:'+steering_angle);
-        }
-        if (code === "o")
-        {
-            steering_angle = -10*(Math.PI/180);     
-            console.log('steering angle:'+steering_angle);
-        }
-        if (code === "p")
-        {
-            steering_angle = 0;        
-            console.log('steering angle:'+steering_angle);
-        }
-        if (code === "q")
-        {
-            steering_angle = 10*(Math.PI/180);
-            console.log('steering angle:'+steering_angle);
-        }
-        if (code === "r")
-        {
-            steering_angle = 20*(Math.PI/180); 
-            console.log('steering angle:'+steering_angle);
-        }
-        if (code === "s")
-        {
-            steering_angle = 30*(Math.PI/180);
-            console.log('steering angle:'+steering_angle);
-        }
-        
-        
-        
-        if (code === "M")
-        {
-            rear_steering_angle = -30*(Math.PI/180);
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "N")
-        {
-            rear_steering_angle = -20*(Math.PI/180);
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "O")
-        {
-            rear_steering_angle = -10*(Math.PI/180);     
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "P")
-        {
-            rear_steering_angle = 0;        
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "Q")
-        {
-            rear_steering_angle = 10*(Math.PI/180);
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "R")
-        {
-            rear_steering_angle = 20*(Math.PI/180); 
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "S")
-        {
-            rear_steering_angle = 30*(Math.PI/180);
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        
-        
-        
-        //0: STOP
-        if (code === "0")
-        {
-            car.stop_engine();
-        }        
-        
-        if (code === "a")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(20);            
-        }
-        if (code === "b")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(40);            
-        }
-        if (code === "c")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(60);            
-        }
-        if (code === "d")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(80);            
-        }
-        if (code === "e")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(100);            
-        }
-
-        if (code === "a")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(20);            
-        }
-        if (code === "b")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(40);            
-        }
-        if (code === "c")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(60);            
-        }
-        if (code === "d")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(80);            
-        }
-        if (code === "e")
-        {
-            car.gear = 1;
-            car.start_engine_at_power(100);            
-        }        
-
-        
-        //backwards
-        if (code === "f")
-        {
-            car.gear = -1;
-            car.start_engine_at_power(20);            
-        }
-        if (code === "g")
-        {
-            car.gear = -1;
-            car.start_engine_at_power(40);            
-        }
-        if (code === "h")
-        {
-            car.gear = -1;
-            car.start_engine_at_power(60);            
-        }
-        if (code === "i")
-        {
-            car.gear = -1;
-            car.start_engine_at_power(80);            
-        }
-        if (code === "j")
-        {
-            car.gear = -1;
-            car.start_engine_at_power(100);            
-        }
-        
-        
         //up
-        
-        /*if (code === "38")
+        if (code === "38")
         {
             var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'acuse de recibo' }); 
             //var jsonstr = JSON.stringify({'name': 'position', 'value': '33'});            
@@ -217,9 +42,102 @@ var game = {
             
             car.gear = 1;
             car.start_engine();
-        }*/
+        }
 
-    },        
+        //right
+        if (code === "39")
+        {
+            steering_angle = steering_angle - min_rotation_unit;
+        }
+
+        //down
+        if (code === "40")
+        {
+            car.gear = -1;
+            car.start_engine();
+        }
+
+
+        //A
+        if (code === "65")
+        {
+            rear_steering_angle = rear_steering_angle - min_rotation_unit;
+        }
+
+        //D
+        if (code === "68")
+        {
+            rear_steering_angle = rear_steering_angle + min_rotation_unit;
+        }
+
+        //S: STOP
+        if (code === "83")
+        {
+            car.stop_engine();
+        }        
+    },
+    
+    //keyboard events
+    'key_down': function (e)
+    {
+        var code = e.keyCode;
+
+
+        //left
+        if (code == 37)
+        {
+            steering_angle = steering_angle + min_rotation_unit;
+        }
+        //up
+        if (code == 38)
+        {            
+            var jsonstr = JSON.stringify({'destiny': 'servidor', 'body':'acuse de recibo' }); 
+            stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
+            car.gear = 1;
+            car.start_engine();
+        }
+
+        //right
+        if (code == 39)
+        {
+            steering_angle = steering_angle - min_rotation_unit;
+        }
+
+        //down
+        if (code == 40)
+        {
+            car.gear = -1;
+            car.start_engine();
+        }
+
+
+        //A
+        if (code == 65)
+        {
+            rear_steering_angle = rear_steering_angle - min_rotation_unit;
+        }
+
+        //D
+        if (code == 68)
+        {
+            rear_steering_angle = rear_steering_angle + min_rotation_unit;
+        }
+
+        //S: STOP
+        if (code == 83)
+        {
+            car.stop_engine();
+        }
+
+
+    },
+    'key_up': function (e)
+    {
+        var code = e.keyCode;
+
+        //key-release events
+
+    },
     'screen_width': 0,
     'screen_height': 0,
 };
@@ -233,6 +151,7 @@ var world;
 var ctx;
 var canvas_height;
 
+
 var carbody;
 
 var min_rotation_unit = Math.PI / 180;
@@ -241,18 +160,10 @@ var min_rotation_unit = Math.PI / 180;
 //1 metre of box2d length becomes 100 pixels on canvas
 var scale = 100;
 
-var obstacle1;
-var obstacle2;
-
 //The car object
 var car = {
     'top_engine_speed': 2.5,
     'engine_on': false,
-    'start_engine_at_power': function (powerpercent)
-    {
-        car.engine_on = true;
-        car.engine_speed = car.gear * (powerpercent*(car.top_engine_speed/100));
-    },
     'start_engine': function ()
     {
         car.engine_on = true;
@@ -282,23 +193,6 @@ function redraw_world(world, context)
     ctx.font = 'bold 15px arial';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
-    
-    
-            ctx.strokeStyle = "rgb(255, 255, 255)";
-
-            ctx.beginPath(); // Start the path
-            
-            context.moveTo(car_raycast_origin.x*100,car_raycast_origin.y*100); // Set the path origin
-            //context.moveTo(p1.x*scale,p1.y*scale); // Set the path origin
-            //ctx.moveTo(10,10); // Set the path origin
-            
-            context.lineTo(car_raycast_intersectionPoint.x*100, car_raycast_intersectionPoint.y*100); // Set the path destination
-            //ctx.lineTo(200, 200); // Set the path destination
-            ctx.closePath(); // Close the path
-            ctx.stroke();
-
-    
-    
     //ctx.fillText('Use arrow keys to move the car', canvas_width/2, 20);
     //ctx.fillText('Car Gear : ' + car.gear + ' Car Engine Speed : ' + car.engine_speed + ' mps ', canvas_width/2, 40);
 }
@@ -321,14 +215,13 @@ function createWorld()
 
     world.SetDebugDraw(debugDraw);
 
-    //createBox(world, game.screen_width / 2, 0.5, game.screen_width / 2 - 1, 0.1, {'type': b2Body.b2_staticBody, 'restitution': 0.5});
-    //createBox(world, game.screen_width - 1, game.screen_height / 2, 0.1, game.screen_height / 2 - 1, {'type': b2Body.b2_staticBody, 'restitution': 0.5});
+    createBox(world, game.screen_width / 2, 0.5, game.screen_width / 2 - 1, 0.1, {'type': b2Body.b2_staticBody, 'restitution': 0.5});
+    createBox(world, game.screen_width - 1, game.screen_height / 2, 0.1, game.screen_height / 2 - 1, {'type': b2Body.b2_staticBody, 'restitution': 0.5});
 
     //few lightweight boxes
     var free = {'restitution': 1.0, 'linearDamping': 1.0, 'angularDamping': 1.0, 'density': 0.2};
-    obstacle1=createBox(world, 2, 2, 0.25, 0.25, free);
-    console.log("Obstacle 1:"+obstacle1.GetPosition().x);
-    obstacle2=createBox(world, 5, 2, 0.5, 0.5, free);
+    createBox(world, 2, 2, 0.5, 0.5, free);
+    createBox(world, 5, 2, 0.5, 0.5, free);
 
     return world;
 }
@@ -367,6 +260,8 @@ function createBox(world, x, y, width, height, options)
 
     var b = world.CreateBody(body_def);
     var f = b.CreateFixture(fix_def);
+    
+    
 
     return b;
 }
@@ -378,22 +273,12 @@ function createBox(world, x, y, width, height, options)
  */
 function game_loop()
 {
-    var updateDelta=0.1;
     var fps = 60;
     var time_step = 1.0 / fps;
 
     update_car();
-    
-    
-    
-    if (Math.abs(car.body.GetPosition().x-carxpos) >= updateDelta){
-        carxpos=car.body.GetPosition().x;
-        obsxpos=obstacle1.GetPosition().x;
-        //console.log("Distance to obstacle:"+(carxpos-obsxpos));
-        //sendEvent("pos.updated",car.body.GetPosition().x+","+car.body.GetPosition().y);                
-    }    
-    
-    
+
+    //console.log(car.body.GetPosition().x);
     //move the world ahead , step ahead man!!
     world.Step(time_step, 8, 3);
     //Clear the forces , Box2d 2.1a 
@@ -424,6 +309,40 @@ $(function ()
 
     create_car();
 
+    //automatic control test
+    /*
+     var count=0;
+     
+     var intv=setInterval(
+     function(){
+     count++;
+     if (count%30===0){
+     game.key_down_f(38);    
+     //createSmallBox(count);
+     }            
+     game.key_down_f(37);
+     
+     //console.log(world.GetBodyList());
+     
+     }
+     ,
+     100
+     );
+     */
+    //
+
+    $(document).keydown(function (e)
+    {
+        game.key_down(e);
+        return false;
+    });
+
+    $(document).keyup(function (e)
+    {
+        game.key_up(e);
+        return false;
+    });
+
     //Start the Game Loop!!!!!!!
     game_loop();
 });
@@ -438,12 +357,10 @@ function createSmallBox(v) {
 function create_car()
 {
     car_pos = new b2Vec2(3, 3);
-    
-    
-    car_dim = new b2Vec2(0.15, 0.35);
+    car_dim = new b2Vec2(0.3, 0.70);
     car.body = createBox(world, car_pos.x, car_pos.y, car_dim.x, car_dim.y, {'linearDamping': 10.0, 'angularDamping': 10.0});
 
-    var wheel_dim = new b2Vec2(0.045, 0.1);
+    var wheel_dim = new b2Vec2(0.09, 0.2);
     //wheel_dim.Multiply(0.2);
 
     //front wheels
@@ -579,86 +496,9 @@ function update_car()
     }
 
 
-    ray();
+
 
 }
-
-
-/*
- * 
- * RAYTRACING
- * 
- */
-
-        function ray()  {
-
-            
-            currentRayAngle =  45; //one revolution every 20 seconds
-            rayLength=10;
-
-            car_raycast_origin.x= car.body.GetPosition().x;
-            car_raycast_origin.y= car.body.GetPosition().y;
-            //var p1 = new b2Vec2( car.body.GetPosition().x, car.body.GetPosition().y );
-            //var p1 = new b2Vec2( 0,0);
-            //var p2 = new b2Vec2();
-            //var intersectionPoint=new b2Vec2();
-            //console.log(currentRayAngle*(180/Math.PI));
-
-            //calculate points of ray
-            car_raycast_destiny.x = car_raycast_origin.x + rayLength * Math.sin(currentRayAngle);
-            car_raycast_destiny.y = car_raycast_origin.y + rayLength * Math.cos(currentRayAngle);
-
-            input = new b2RayCastInput();
-            output = new b2RayCastOutput();
-
-
-            input.p1 = car_raycast_origin;
-            input.p2 = car_raycast_destiny;
-            input.maxFraction = 1;
-            closestFraction = 1;
-
-            var b = new b2BodyDef();
-            var f = new b2FixtureDef();
-            for(b = world.GetBodyList(); b; b = b.GetNext())    {           
-                for(f = b.GetFixtureList(); f; f = f.GetNext()) {
-                    if(!f.RayCast(output, input))
-                        continue;
-                    else if(output.fraction < closestFraction)  {
-                        closestFraction = output.fraction;
-                                    intersectionNormal = output.normal;
-                    }
-                }
-
-            } 
-            
-            car_raycast_intersectionPoint.x = car_raycast_origin.x + closestFraction * (car_raycast_destiny.x - car_raycast_origin.x);
-            car_raycast_intersectionPoint.y = car_raycast_origin.y + closestFraction * (car_raycast_destiny.y - car_raycast_origin.y);
-            
-            console.log("--->Closest fraction:"+closestFraction);
-
-
-            //ctx.strokeStyle = "rgb(255, 255, 255)";
-
-            //ctx.beginPath(); // Start the path
-            
-            //context.moveTo(p1.x*30,p1.y*30); // Set the path origin
-            //context.moveTo(p1.x*scale,p1.y*scale); // Set the path origin
-            //ctx.moveTo(10,10); // Set the path origin
-            
-            //context.lineTo(intersectionPoint.x*scale, intersectionPoint.y*scale); // Set the path destination
-            //ctx.lineTo(200, 200); // Set the path destination
-           //ctx.closePath(); // Close the path
-            //ctx.stroke();
-
-            //context.beginPath(); // Start the path
-            //context.moveTo(intersectionPoint.x*30, intersectionPoint.y*30); // Set the path origin
-            //context.lineTo(normalEnd.x*30, normalEnd.y*30); // Set the path destination
-            //context.closePath(); // Close the path
-            //context.stroke(); // Outline the path
-        }
-
-
-/*----------------------------*/
 
 
 var socket = new SockJS("/roversim/sockets/ws");
@@ -666,10 +506,9 @@ var stompClient = Stomp.over(socket);
 
 // Callback function to be called when stomp client is connected to server
 var connectCallback = function () {
-    
-    stompClient.subscribe('/topic/command/'+randomIdentifier,
+    stompClient.subscribe('/topic/newmessage',
             function (data) {
-                console.log("GOT COMMAND:" + data);
+                console.log("got:" + data);
                 var message=JSON.parse(data.body);                
                 game.rover_commands(message.commandCode);
                 
@@ -677,21 +516,6 @@ var connectCallback = function () {
                 //console.log("got:" + message.destiny + "," + message.body);
             }
     );
-    
-    stompClient.subscribe('/topic/messages/'+randomIdentifier,
-            function (data) {
-                //console.log("got message:" + data);
-                var message=JSON.parse(data.body); 
-                
-                showError(message.body);                
-                
-                //game.rover_commands(message.commandCode);
-                
-                //var message = JSON.parse(data.body);
-                //console.log("got:" + message.destiny + "," + message.body);
-            }
-    );    
-    
 };
 
 // Callback function to be called when stomp client could not connect to server
@@ -701,9 +525,3 @@ var errorCallback = function (error) {
 
 // Connect to server via websocket
 stompClient.connect("guest", "guest", connectCallback, errorCallback);
-
-sendEvent = function (name,value) {
-                var jsessionId = randomIdentifier;                
-                var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
-                stompClient.send("/app/event", {}, jsonstr);
-            };

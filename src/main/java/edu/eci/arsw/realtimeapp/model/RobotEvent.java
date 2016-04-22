@@ -24,10 +24,15 @@ public class RobotEvent {
     
     private String name;
     private String value;
+    private String clientSessionId;
 
-    public RobotEvent(String name, String value) {
+    public RobotEvent(String name, String value, String clientSessionId) {
         this.name = name;
         this.value = value;
+        this.clientSessionId = clientSessionId;
+    }
+
+    public RobotEvent() {
     }
 
     public String getName() {
@@ -45,6 +50,15 @@ public class RobotEvent {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public String getClientSessionId() {
+        return clientSessionId;
+    }
+
+    public void setClientSessionId(String clientSessionId) {
+        this.clientSessionId = clientSessionId;
+    }
+    
 
     @Override
     public String toString() {

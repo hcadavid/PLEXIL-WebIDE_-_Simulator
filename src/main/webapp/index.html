@@ -84,18 +84,27 @@ Command MoveForward(Integer);
 Command MoveBackward(Integer); 
 
 //Stop
-Command StopEngine()
+Command StopEngine();
+
+Command pprint(...);
 
 CommandsTest:{
-    
+    Concurrence{
         TF:{
             TurnFrontWheels(30);
         }
         
         MF:{            
             MoveForward(3);
-        }               
-   
+        }       
+        
+        WHEELSTUCKLISTENER:{
+            StartCondition Lookup(WheelStuck)==1;
+            pprint ("*************** GOT EVENT: WHEELSTUCK:");
+            StopEngine();
+        }
+        
+    }
 }
                     </div>
 

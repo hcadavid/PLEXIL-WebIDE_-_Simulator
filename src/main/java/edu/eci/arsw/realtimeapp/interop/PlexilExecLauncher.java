@@ -95,7 +95,10 @@ public class PlexilExecLauncher {
                     while ((line = br.readLine()) != null) {
                         if (line.startsWith("[CMD]")) {
                             cmdcb.execute(line.substring(5).trim());
-                        }                        
+                        }
+                        else{
+                            Logger.getLogger(PlexilExecLauncher.class.getName()).log(Level.INFO,"Unknown STDOUT message received from plan adapter:"+line,"Undefined STDOUT message received from plan adapter:"+line);
+                        }
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(PlexilExecLauncher.class.getName()).log(Level.SEVERE, null, ex);
@@ -111,7 +114,7 @@ public class PlexilExecLauncher {
     public static void main(String args[]) throws IOException {
         Process p = PlexilExecLauncher.getInstance().createPlanExecutionProcess("/Users/hcadavid/apps/plexil-4.0.1",
                 "/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/interface-config.xml",
-                "/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/eci-robotics-plans/CommandsExample.plx",
+                "/Users/hcadavid/ECI/2015-2/Robotics-Plexil/source-adapter/robotics-interfacing/eci-robotics-plans/EventsExample.plx",
                 
                 new CommandReceivedCallback() {
                     @Override
@@ -153,12 +156,12 @@ class ExecutiveInput extends Thread {
     public void run() {
         try {
             Thread.sleep(10000);
-            w.write("ws\n");            
+            w.write("pos.updated,12.000,12.000\n"); 
             w.flush();
-            System.out.println("Sending ws");
+            System.out.println("Sending posupdate");
             Thread.sleep(10000);
-            System.out.println("Sending temp");
-            w.write("temp\n");
+            System.out.println("Sending ws");
+            w.write("ws\n");
             w.flush();
         } catch (InterruptedException ex) {
             Logger.getLogger(ExecutiveInput.class.getName()).log(Level.SEVERE, null, ex);

@@ -84,44 +84,6 @@
          temp.CreateFixture(fd);
 
          var c=0;
-         /*$(window).keydown(function(e) {
-             $('#aa').html(++c);
-             code = e.keyCode;
-             if(c==1)   {
-             if(code == 38 && onground)
-                 wheel.SetLinearVelocity(new b2Vec2(0,-10));
-             if(code == 39)
-                wheel.ApplyForce(new b2Vec2(1000,0), box1.GetWorldPoint(new b2Vec2(0,0)));
-             if(code == 37)
-                wheel.ApplyForce(new b2Vec2(-1000,0), box1.GetWorldPoint(new b2Vec2(0,0)));
-             }
-         });
-         $(window).keyup(function(e) {
-            c=0;
-         });*/
-
-         /*var listener = new Box2D.Dynamics.b2ContactListener;
-         listener.BeginContact = function(contact) {
-             if(contact.GetFixtureA().GetBody().GetUserData()== 'obj' || contact.GetFixtureB().GetBody().GetUserData()== 'obj' ) // think about why we don't use fixture's userData directly.
-                onground = true;// don't put 'var' here!
-             fxA=contact.GetFixtureA();
-             fxB=contact.GetFixtureB();
-             sA=fxA.IsSensor();
-             sB=fxB.IsSensor();
-             if((sA && !sB) || (sB && !sA)) {
-                 if(sA) {
-                     $('#cc').prepend(contact.GetFixtureB().GetBody().GetUserData() + ' is in the viscinity of body '+contact.GetFixtureA().GetBody().GetUserData()+'<br>');
-                 }
-                 else   {
-                     $('#cc').prepend(contact.GetFixtureA().GetBody().GetUserData() + ' is in the viscinity of body '+contact.GetFixtureB().GetBody().GetUserData()+'<br>');
-                 }
-             }
-         }       
-         listener.EndContact = function(contact) {
-         if (contact.GetFixtureA().GetBody().GetUserData()== 'obj' || contact.GetFixtureB().GetBody().GetUserData()== 'obj' )
-             onground = false;
-         }   */
-
 
         var debugDraw = new b2DebugDraw();
         debugDraw.SetSprite ( document.getElementById ("canvas").getContext ("2d"));
@@ -193,6 +155,9 @@
         var p1 = new b2Vec2( 2, 2 ); //center of scene
         var p2 = new b2Vec2();
         var normalEnd = new b2Vec2();
+        
+        
+        
         function update() {
 
             if(isMouseDown && (!mouseJoint)) {

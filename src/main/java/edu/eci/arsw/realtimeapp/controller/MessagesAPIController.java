@@ -10,11 +10,16 @@ import edu.eci.arsw.realtimeapp.model.Command;
 import edu.eci.arsw.realtimeapp.model.ExecutionRequest;
 import edu.eci.arsw.realtimeapp.model.Message;
 import edu.eci.arsw.realtimeapp.model.RobotEvent;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
@@ -44,6 +49,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class MessagesAPIController {
     
     
+    //Process id, OutputStream
+    private ConcurrentHashMap<String,OutputStream> openOutputStreams;
+    private ConcurrentHashMap<String,BufferedWriter> openOutputStreamsWriters;
+    
     @Autowired 
     private SimpMessagingTemplate template;  
     
@@ -59,7 +68,8 @@ public class MessagesAPIController {
     
     
     public MessagesAPIController(){
-        
+        openOutputStreams=new ConcurrentHashMap<>();
+        openOutputStreamsWriters=new ConcurrentHashMap<>();
         /*new Thread(){
             public void run(){
                 while (true) {
@@ -131,6 +141,11 @@ public class MessagesAPIController {
                         @Override
                         public void execute() {
                             template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution success."));            
+                            /*try {
+                                openOutputStreams.get(er.getClientSessionId()).close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
+                            }*/
                         }
                     },
                     new PlanExecutionFailureCallback() {
@@ -139,7 +154,11 @@ public class MessagesAPIController {
                             template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg));            
                         }
                     });
-            /*Execution*/
+            
+            OutputStream os=p.getOutputStream();
+            openOutputStreams.put(er.getClientSessionId(), os);
+            openOutputStreamsWriters.put(er.getClientSessionId(), new BufferedWriter(new OutputStreamWriter(os)));
+            
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
             template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage()));            
@@ -162,7 +181,7 @@ public class MessagesAPIController {
             out.write(er.getSource());
             out.close();
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
         }
         try {
             PlexilCompiler.getInstance().compile(env.getProperty("plexilhome"),srcFile);
@@ -174,7 +193,26 @@ public class MessagesAPIController {
         
     }
 
-       
+
+    @MessageMapping("/event") 
+    public void receiveEvent(SimpMessageHeaderAccessor headerAccessor,RobotEvent re) {
+        System.out.println("GOT EVENT FROM "+re.getClientSessionId());
+        if (re.getName().equals("pos.updated")){
+            try {
+                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
+                bw.write("pos.updated,"+re.getValue()+"\n");
+                bw.flush();
+                
+            } catch (IOException ex) {
+                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }
+        }
+        
+        System.out.println(re);
+        
+        
+    }    
+    
     
     @RequestMapping(value = "/check",method = RequestMethod.GET)        
     public String check(HttpSession session) {  
