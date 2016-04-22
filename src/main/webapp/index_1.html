@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+
+        <script src="js/libs/Box2dWeb-2.1.a.3.js"></script>    
+        <script src="js/libs/stomp.js"></script>
+        <script src="js/libs/sockjs-0.3.min.js"></script>
+        <script src="js/libs/ace/ace.js"></script>
+
+        <script>
+            compile = function () {
+                var jsessionId = randomIdentifier;
+                var source = editor.getValue();
+                var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'source': source});
+                stompClient.send("/app/compile", {}, jsonstr);
+            };
+            execute = function () {
+                var jsessionId = randomIdentifier;
+                var source = editor.getValue();
+                var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'source': source});
+                stompClient.send("/app/execute", {}, jsonstr);
+            };
+
+            start = function () {
+                var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': 'a'});
+                stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
+            };
+
+            stop = function () {
+                var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': '0'});
+                stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
+            };
+        </script>        
+
+
+    </head>
+    <body>
+
+
+        <div class="page-header">
+            <div class="container">
+                <div class="row-fluid">
+                    <h1>Plexil-based Automation programming platform</h1>
+                    <h4>H&eacute;ctor Fabio Cadavid R. - Escuela Colombiana de Ingenier&iacute;a - hector.cadavid@escuelaing.edu.co</h4>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabbed-pane" style="margin: 20px">
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#sectionA">Simulation</a></li>
+                <li><a data-toggle="tab" href="#sectionB">Plexil Plan</a></li>        
+            </ul>
+            <div class="tab-content">
+                <div id="sectionA" class="tab-pane fade in active">
+
+                    <canvas id="canvas" width='800' height='600' style="background-color:#333;"></canvas>
+
+                </div>
+                <div id="sectionB" class="tab-pane fade">
+                    <div id="editor" style="position: relative;width: 800px; height: 600px;">
+
+
+//Set front wheels angle [-30..30]
+Command TurnFrontWheels(Integer);
+
+//Set rear wheels angle [-30..30]
+Command TurnRearWheels(Integer); 
+
+//Move forward with a given power level [0..100]
+Command MoveForward(Integer); 
+
+//Move backwards with a given power level [0..100]
+Command MoveBackward(Integer); 
+
+//Stop
+Command StopEngine()
+
+CommandsTest:{
+    
+        TF:{
+            TurnFrontWheels(30);
+        }
+        
+        MF:{            
+            MoveForward(3);
+        }               
+   
+}
+                    </div>
+
+                </div>
+            </div>
+        </div>  
+
+
+
+        <div id="errors" title="Error">
+            <p>
+                <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+                <span></span>
+
+            </p>
+        </div>        
+
+
+        <script>
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/twilight");
+
+            $('#errors').dialog({autoOpen: false});
+
+            showError = function (msg) {
+                $('#errors span').text(msg);
+                $('#errors').dialog('open');
+            };
+
+        </script>
+
+
+        <div style="text-align:center;">
+            <button onclick="compile()" >Compile</button>                
+            <button onclick="execute()" >Execute</button>                
+        </div>
+
+        <script src="js/app/roversim.js"></script>    
+
+
+    </body>
+</html>
