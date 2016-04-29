@@ -196,7 +196,8 @@ public class MessagesAPIController {
 
     @MessageMapping("/event") 
     public void receiveEvent(SimpMessageHeaderAccessor headerAccessor,RobotEvent re) {
-        System.out.println("GOT EVENT FROM "+re.getClientSessionId());
+        System.out.println("GOT EVENT FROM "+re.getClientSessionId()+":"+re);
+        
         if (re.getName().equals("pos.updated")){
             try {
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
@@ -207,8 +208,20 @@ public class MessagesAPIController {
                 Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
             }
         }
+        if (re.getName().equals("leftobstacle.distance")){
+            try {
+                System.out.println("Forwarding");
+                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
+                bw.write("leftobstacle.distance,"+re.getValue()+"\n");
+                bw.flush();
+                
+            } catch (IOException ex) {
+                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }
+        }
         
-        System.out.println(re);
+        
+        
         
         
     }    

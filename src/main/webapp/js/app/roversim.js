@@ -43,7 +43,8 @@ var right_car_raycast_origin = new b2Vec2( 0,0);
 var right_car_raycast_destiny = new b2Vec2();
 var right_car_raycast_intersectionPoint=new b2Vec2();
 
-
+var closest_right_obstacle;
+var closest_left_obstacle;
 
 
 var game = {
@@ -392,14 +393,22 @@ function game_loop()
 
     update_car();
     
+    if (closest_left_obstacle!==1){
+        sendEvent("leftobstacle.distance",closest_left_obstacle); 
+        console.log("Left obstacle at:"+closest_left_obstacle);
+    }
+
+    if (closest_right_obstacle!==1){
+        sendEvent("leftobstacle.distance",closest_right_obstacle);                
+        console.log("Right obstacle at:"+closest_right_obstacle);
+    }
+
     
-    
-    if (Math.abs(car.body.GetPosition().x-carxpos) >= updateDelta){
-        carxpos=car.body.GetPosition().x;
-        obsxpos=obstacle1.GetPosition().x;
+    /*if (Math.abs(car.body.GetPosition().x-carxpos) >= updateDelta){
+        carxpos=car.body.GetPosition().x;    
         //console.log("Distance to obstacle:"+(carxpos-obsxpos));
-        //sendEvent("pos.updated",car.body.GetPosition().x+","+car.body.GetPosition().y);                
-    }    
+        sendEvent("pos.updated",car.body.GetPosition().x+","+car.body.GetPosition().y);                
+    } */   
     
     
     //move the world ahead , step ahead man!!
@@ -445,7 +454,7 @@ function createSmallBox(v) {
 
 function create_car()
 {
-    car_pos = new b2Vec2(3, 3);
+    car_pos = new b2Vec2(carxpos, carypos);
     
     
     car_dim = new b2Vec2(0.15, 0.35);
@@ -641,7 +650,8 @@ function rightRay() {
     right_car_raycast_intersectionPoint.x = right_car_raycast_origin.x + closestFraction * (right_car_raycast_destiny.x - right_car_raycast_origin.x);
     right_car_raycast_intersectionPoint.y = right_car_raycast_origin.y + closestFraction * (right_car_raycast_destiny.y - right_car_raycast_origin.y);
 
-    console.log("--->Right Closest fraction:"+closestFraction);
+    closest_right_obstacle=closestFraction;
+    //console.log("--->Right Closest fraction:"+closestFraction);
 
 }
 
@@ -687,7 +697,8 @@ function leftRay() {
     left_car_raycast_intersectionPoint.x = left_car_raycast_origin.x + closestFraction * (left_car_raycast_destiny.x - left_car_raycast_origin.x);
     left_car_raycast_intersectionPoint.y = left_car_raycast_origin.y + closestFraction * (left_car_raycast_destiny.y - left_car_raycast_origin.y);
 
-    console.log("--->Left Closest fraction:"+closestFraction);
+    closest_left_obstacle=closestFraction;
+    //console.log("--->Left Closest fraction:"+closestFraction);
 
 }
 
