@@ -282,25 +282,19 @@ function redraw_world(world, context)
     ctx.font = 'bold 15px arial';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
-    
-    
-            ctx.strokeStyle = "rgb(255, 255, 255)";
 
-            ctx.beginPath(); // Start the path
-            
-            context.moveTo(car_raycast_origin.x*100,car_raycast_origin.y*100); // Set the path origin
-            //context.moveTo(p1.x*scale,p1.y*scale); // Set the path origin
-            //ctx.moveTo(10,10); // Set the path origin
-            
-            context.lineTo(car_raycast_intersectionPoint.x*100, car_raycast_intersectionPoint.y*100); // Set the path destination
-            //ctx.lineTo(200, 200); // Set the path destination
-            ctx.closePath(); // Close the path
-            ctx.stroke();
+    ctx.strokeStyle = "rgb(255, 255, 255)";
 
-    
-    
-    //ctx.fillText('Use arrow keys to move the car', canvas_width/2, 20);
-    //ctx.fillText('Car Gear : ' + car.gear + ' Car Engine Speed : ' + car.engine_speed + ' mps ', canvas_width/2, 40);
+    ctx.beginPath(); // Start the path
+
+
+    ctx.moveTo(car_raycast_origin.x * scale, canvas_height - (car_raycast_origin.y * scale)); // Set the path origin
+
+    ctx.lineTo(car_raycast_intersectionPoint.x * scale, canvas_height - (car_raycast_intersectionPoint.y * scale));
+
+    ctx.closePath(); // Close the path
+    ctx.stroke();
+
 }
 
 //Create box2d world object
@@ -403,7 +397,7 @@ function game_loop()
     redraw_world(world, ctx);
 
     //call this function again after 10 seconds
-    setTimeout('game_loop()', 1000 / 60);
+    setTimeout('game_loop()', 5000 / 60);
 }
 
 
@@ -590,72 +584,75 @@ function update_car()
  * 
  */
 
-        function ray()  {
+function ray() {
 
-            
-            currentRayAngle =  45; //one revolution every 20 seconds
-            rayLength=10;
+    
+    rayLength = 10;
 
-            car_raycast_origin.x= car.body.GetPosition().x;
-            car_raycast_origin.y= car.body.GetPosition().y;
-            //var p1 = new b2Vec2( car.body.GetPosition().x, car.body.GetPosition().y );
-            //var p1 = new b2Vec2( 0,0);
-            //var p2 = new b2Vec2();
-            //var intersectionPoint=new b2Vec2();
-            //console.log(currentRayAngle*(180/Math.PI));
+    car_angle=car.body.GetAngle();
+    car_raycast_origin.x = car.body.GetPosition().x;
+    car_raycast_origin.y = car.body.GetPosition().y;
 
-            //calculate points of ray
-            car_raycast_destiny.x = car_raycast_origin.x + rayLength * Math.sin(currentRayAngle);
-            car_raycast_destiny.y = car_raycast_origin.y + rayLength * Math.cos(currentRayAngle);
+    currentRayAngle = car_angle; //one revolution every 20 seconds
+    
+    //var p1 = new b2Vec2( car.body.GetPosition().x, car.body.GetPosition().y );
+    //var p1 = new b2Vec2( 0,0);
+    //var p2 = new b2Vec2();
+    //var intersectionPoint=new b2Vec2();
+    //console.log(currentRayAngle*(180/Math.PI));
 
-            input = new b2RayCastInput();
-            output = new b2RayCastOutput();
+    //calculate points of ray
+    car_raycast_destiny.x = car_raycast_origin.x + rayLength * Math.sin(currentRayAngle);
+    car_raycast_destiny.y = car_raycast_origin.y + rayLength * Math.cos(currentRayAngle);
 
-
-            input.p1 = car_raycast_origin;
-            input.p2 = car_raycast_destiny;
-            input.maxFraction = 1;
-            closestFraction = 1;
-
-            var b = new b2BodyDef();
-            var f = new b2FixtureDef();
-            for(b = world.GetBodyList(); b; b = b.GetNext())    {           
-                for(f = b.GetFixtureList(); f; f = f.GetNext()) {
-                    if(!f.RayCast(output, input))
-                        continue;
-                    else if(output.fraction < closestFraction)  {
-                        closestFraction = output.fraction;
-                                    intersectionNormal = output.normal;
-                    }
-                }
-
-            } 
-            
-            car_raycast_intersectionPoint.x = car_raycast_origin.x + closestFraction * (car_raycast_destiny.x - car_raycast_origin.x);
-            car_raycast_intersectionPoint.y = car_raycast_origin.y + closestFraction * (car_raycast_destiny.y - car_raycast_origin.y);
-            
-            console.log("--->Closest fraction:"+closestFraction);
+    input = new b2RayCastInput();
+    output = new b2RayCastOutput();
 
 
-            //ctx.strokeStyle = "rgb(255, 255, 255)";
+    input.p1 = car_raycast_origin;
+    input.p2 = car_raycast_destiny;
+    input.maxFraction = 1;
+    closestFraction = 1;
 
-            //ctx.beginPath(); // Start the path
-            
-            //context.moveTo(p1.x*30,p1.y*30); // Set the path origin
-            //context.moveTo(p1.x*scale,p1.y*scale); // Set the path origin
-            //ctx.moveTo(10,10); // Set the path origin
-            
-            //context.lineTo(intersectionPoint.x*scale, intersectionPoint.y*scale); // Set the path destination
-            //ctx.lineTo(200, 200); // Set the path destination
-           //ctx.closePath(); // Close the path
-            //ctx.stroke();
-
-            //context.beginPath(); // Start the path
-            //context.moveTo(intersectionPoint.x*30, intersectionPoint.y*30); // Set the path origin
-            //context.lineTo(normalEnd.x*30, normalEnd.y*30); // Set the path destination
-            //context.closePath(); // Close the path
-            //context.stroke(); // Outline the path
+    var b = new b2BodyDef();
+    var f = new b2FixtureDef();
+    for (b = world.GetBodyList(); b; b = b.GetNext()) {
+        for (f = b.GetFixtureList(); f; f = f.GetNext()) {
+            if (!f.RayCast(output, input))
+                continue;
+            else if (output.fraction < closestFraction) {
+                closestFraction = output.fraction;
+                intersectionNormal = output.normal;
+            }
         }
+
+    }
+
+    car_raycast_intersectionPoint.x = car_raycast_origin.x + closestFraction * (car_raycast_destiny.x - car_raycast_origin.x);
+    car_raycast_intersectionPoint.y = car_raycast_origin.y + closestFraction * (car_raycast_destiny.y - car_raycast_origin.y);
+
+    //console.log("--->Closest fraction:"+closestFraction);
+
+
+    //ctx.strokeStyle = "rgb(255, 255, 255)";
+
+    //ctx.beginPath(); // Start the path
+
+    //context.moveTo(p1.x*30,p1.y*30); // Set the path origin
+    //context.moveTo(p1.x*scale,p1.y*scale); // Set the path origin
+    //ctx.moveTo(10,10); // Set the path origin
+
+    //context.lineTo(intersectionPoint.x*scale, intersectionPoint.y*scale); // Set the path destination
+    //ctx.lineTo(200, 200); // Set the path destination
+    //ctx.closePath(); // Close the path
+    //ctx.stroke();
+
+    //context.beginPath(); // Start the path
+    //context.moveTo(intersectionPoint.x*30, intersectionPoint.y*30); // Set the path origin
+    //context.lineTo(normalEnd.x*30, normalEnd.y*30); // Set the path destination
+    //context.closePath(); // Close the path
+    //context.stroke(); // Outline the path
+}
 
 
 /*----------------------------*/
