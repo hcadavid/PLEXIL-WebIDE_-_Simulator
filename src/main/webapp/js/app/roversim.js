@@ -589,7 +589,7 @@ function ray() {
     
     rayLength = 10;
 
-    car_angle=car.body.GetAngle();
+    car_angle=car.body.GetAngle()*-1;
     car_raycast_origin.x = car.body.GetPosition().x;
     car_raycast_origin.y = car.body.GetPosition().y;
 
