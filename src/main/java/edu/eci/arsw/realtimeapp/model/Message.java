@@ -13,12 +13,20 @@ public class Message {
     
     private String destiny;
     private String body;
+    private Integer messageId;
+    
+    public static final int COMPILATION_ERROR=0;
+    public static final int COMPILATION_SUCCES=1;
+    public static final int PLAN_EXECUTION_ERROR=2;
+    public static final int PLAN_SUCCESS=3;
+    public static final int PLATFORM_ERROR=4;
 
-    public Message(String destiny, String body) {
+    public Message(String destiny, String body, Integer messageId) {
         this.destiny = destiny;
         this.body = body;
+        this.messageId = messageId;
     }
-
+    
     public Message() {
     }
 
@@ -36,6 +44,10 @@ public class Message {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public Integer getMessageId() {
+        return messageId;
     }
 
     

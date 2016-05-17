@@ -140,7 +140,7 @@ public class MessagesAPIController {
                     new FinishedPlanCallback() {
                         @Override
                         public void execute() {
-                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution success."));            
+                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution success.",Message.PLAN_SUCCESS));            
                             /*try {
                                 openOutputStreams.get(er.getClientSessionId()).close();
                             } catch (IOException ex) {
@@ -151,7 +151,7 @@ public class MessagesAPIController {
                     new PlanExecutionFailureCallback() {
                         @Override
                         public void execute(String msg) {
-                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg));            
+                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg,Message.PLAN_EXECUTION_ERROR));            
                         }
                     });
             
@@ -161,7 +161,7 @@ public class MessagesAPIController {
             
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage()));            
+            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
         } catch (IOException ex) {
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -185,10 +185,10 @@ public class MessagesAPIController {
         }
         try {
             PlexilCompiler.getInstance().compile(env.getProperty("plexilhome"),srcFile);
-            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Compilation success."));            
+            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Compilation success.",Message.COMPILATION_SUCCES));            
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage()));            
+            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
         }
         
     }
@@ -209,10 +209,19 @@ public class MessagesAPIController {
             }
         }
         if (re.getName().equals("leftobstacle.distance")){
-            try {
-                System.out.println("Forwarding");
+            try {                
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
                 bw.write("leftobstacle.distance,"+re.getValue()+"\n");
+                bw.flush();
+                
+            } catch (IOException ex) {
+                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }
+        }
+        if (re.getName().equals("rightobstacle.distance")){
+            try {                
+                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
+                bw.write("rightobstacle.distance,"+re.getValue()+"\n");
                 bw.flush();
                 
             } catch (IOException ex) {

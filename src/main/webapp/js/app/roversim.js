@@ -35,6 +35,9 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
         ;
 
 
+var plan_finished=false;
+var plan_execution_error=false;
+
 var left_car_raycast_origin = new b2Vec2( 0,0);
 var left_car_raycast_destiny = new b2Vec2();
 var left_car_raycast_intersectionPoint=new b2Vec2();
@@ -43,8 +46,11 @@ var right_car_raycast_origin = new b2Vec2( 0,0);
 var right_car_raycast_destiny = new b2Vec2();
 var right_car_raycast_intersectionPoint=new b2Vec2();
 
-var closest_right_obstacle;
-var closest_left_obstacle;
+var closest_right_obstacle=1;
+var closest_left_obstacle=1;
+
+var last_known_closest_right_obstacle=1;
+var last_known_closest_left_obstacle=1;
 
 
 var game = {
@@ -393,14 +399,17 @@ function game_loop()
 
     update_car();
     
-    if (closest_left_obstacle!==1){
-        sendEvent("leftobstacle.distance",closest_left_obstacle); 
-        console.log("Left obstacle at:"+closest_left_obstacle);
+    
+    if (closest_left_obstacle!==last_known_closest_left_obstacle){
+        sendEvent("leftobstacle.distance",closest_left_obstacle);
+        last_known_closest_left_obstacle=closest_left_obstacle;
+        //console.log("Left obstacle at:"+closest_left_obstacle);
     }
 
-    if (closest_right_obstacle!==1){
-        sendEvent("leftobstacle.distance",closest_right_obstacle);                
-        console.log("Right obstacle at:"+closest_right_obstacle);
+    if (closest_right_obstacle!==last_known_closest_right_obstacle){
+        sendEvent("rightobstacle.distance",closest_right_obstacle);                
+        last_known_closest_right_obstacle=closest_right_obstacle;
+        //console.log("Right obstacle at:"+closest_right_obstacle);
     }
 
     
@@ -729,6 +738,14 @@ var connectCallback = function () {
                 
                 showError(message.body);                
                 
+                if (message.messageId===3){
+                    console.log(">>>>>> Plan is finshed");
+                    plan_finished=true;
+                }
+                else if (message.messageId===2){
+                    plan_execution_error=true;
+                }
+
                 //game.rover_commands(message.commandCode);
                 
                 //var message = JSON.parse(data.body);
@@ -747,7 +764,11 @@ var errorCallback = function (error) {
 stompClient.connect("guest", "guest", connectCallback, errorCallback);
 
 sendEvent = function (name,value) {
-                var jsessionId = randomIdentifier;                
-                var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
-                stompClient.send("/app/event", {}, jsonstr);
+    
+                //avoid messaging when the plan has stopped (after a success exection or an error).
+                if (!plan_finished && plan_execution_error){
+                    var jsessionId = randomIdentifier;                
+                    var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
+                    stompClient.send("/app/event", {}, jsonstr);                    
+                }
             };
