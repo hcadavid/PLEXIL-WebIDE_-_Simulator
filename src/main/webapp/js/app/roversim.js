@@ -398,8 +398,7 @@ function game_loop()
     var time_step = 1.0 / fps;
 
     update_car();
-    
-    
+        
     if (closest_left_obstacle!==last_known_closest_left_obstacle){
         sendEvent("leftobstacle.distance",closest_left_obstacle);
         last_known_closest_left_obstacle=closest_left_obstacle;
@@ -766,9 +765,10 @@ stompClient.connect("guest", "guest", connectCallback, errorCallback);
 sendEvent = function (name,value) {
     
                 //avoid messaging when the plan has stopped (after a success exection or an error).
-                if (!plan_finished && plan_execution_error){
+                if (!plan_finished && !plan_execution_error){
                     var jsessionId = randomIdentifier;                
                     var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
+                    console.log('>>>>>Sending '+jsonstr)
                     stompClient.send("/app/event", {}, jsonstr);                    
                 }
             };

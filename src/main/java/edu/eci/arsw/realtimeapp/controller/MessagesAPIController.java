@@ -196,7 +196,7 @@ public class MessagesAPIController {
 
     @MessageMapping("/event") 
     public void receiveEvent(SimpMessageHeaderAccessor headerAccessor,RobotEvent re) {
-        System.out.println("GOT EVENT FROM "+re.getClientSessionId()+":"+re);
+        //System.out.println("FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re);
         
         if (re.getName().equals("pos.updated")){
             try {

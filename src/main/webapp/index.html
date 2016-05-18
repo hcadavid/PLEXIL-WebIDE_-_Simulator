@@ -98,11 +98,24 @@ CommandsTest:{
             MoveForward(3);
         }       
         
-        WHEELSTUCKLISTENER:{
-            StartCondition Lookup(WheelStuck)==1;
-            pprint ("*************** GOT EVENT: WHEELSTUCK:");
-            StopEngine();
+        HandleLeftSensor: {    
+            Start Lookup(LeftSonarMeasuredDistance)<1;
+            Repeat true;        
+            pprint("Collision at left");
         }
+
+        Safe:{
+            Start Lookup(LeftSonarMeasuredDistance)==1 && Lookup(RightSonarMeasuredDistance)==1;
+            Repeat true;
+            pprint("SAFE!");
+        }        
+        
+        HandleRightSensor: {    
+            Start Lookup(RightSonarMeasuredDistance)<1;
+            Repeat true;
+            pprint("Collision at right");
+        }
+
         
     }
 }
