@@ -38,6 +38,10 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
 var plan_finished=false;
 var plan_execution_error=false;
 
+var center_car_raycast_origin = new b2Vec2( 0,0);
+var center_car_raycast_destiny = new b2Vec2();
+var center_car_raycast_intersectionPoint=new b2Vec2();
+
 var left_car_raycast_origin = new b2Vec2( 0,0);
 var left_car_raycast_destiny = new b2Vec2();
 var left_car_raycast_intersectionPoint=new b2Vec2();
@@ -46,11 +50,15 @@ var right_car_raycast_origin = new b2Vec2( 0,0);
 var right_car_raycast_destiny = new b2Vec2();
 var right_car_raycast_intersectionPoint=new b2Vec2();
 
+var obstacles_info={closest_right_obstacle:1,closest_left_obstacle:1,closest_center_obstacle:1};
+
 var closest_right_obstacle=1;
 var closest_left_obstacle=1;
+var closest_center_obstacle=1;
 
 var last_known_closest_right_obstacle=1;
 var last_known_closest_left_obstacle=1;
+var last_known_closest_center_obstacle=1;
 
 
 var game = {
@@ -298,7 +306,11 @@ function redraw_world(world, context)
         
     ctx.strokeStyle = "rgb(255, 255, 255)";
 
+
+    //draw_ray(ctx,left_car_raycast_origin,scale,canvas_height,left_car_raycast_intersectionPoint);
+    
     ctx.setLineDash([10]);
+    
     //draw left raytracing
     ctx.beginPath(); // Start the path    
     ctx.moveTo(left_car_raycast_origin.x * scale, canvas_height - (left_car_raycast_origin.y * scale)); // Set the path origin
@@ -306,16 +318,34 @@ function redraw_world(world, context)
     //ctx.closePath(); // Close the path
     ctx.stroke();
 
-    //draw left raytracing
+    //draw right raytracing
     ctx.beginPath(); // Start the path
     ctx.moveTo(right_car_raycast_origin.x * scale, canvas_height - (right_car_raycast_origin.y * scale)); // Set the path origin
     ctx.lineTo(right_car_raycast_intersectionPoint.x * scale, canvas_height - (right_car_raycast_intersectionPoint.y * scale));
     //ctx.closePath(); // Close the path
     ctx.stroke();
+
+    //draw central raytracing
+    ctx.beginPath(); // Start the path
+    ctx.moveTo(center_car_raycast_origin.x * scale, canvas_height - (center_car_raycast_origin.y * scale)); // Set the path origin
+    ctx.lineTo(center_car_raycast_intersectionPoint.x * scale, canvas_height - (center_car_raycast_intersectionPoint.y * scale));
+    //ctx.closePath(); // Close the path
+    ctx.stroke();
+
     
     ctx.setLineDash([]);
 
 
+}
+
+function draw_ray(ctx, raycast_origin,scale,canvas_height,raycast_intersectionPoint){
+    ctx.setLineDash([10]);
+    ctx.beginPath(); // Start the path
+    ctx.moveTo(raycast_origin.x * scale, canvas_height - (raycast_origin.y * scale)); // Set the path origin
+    ctx.lineTo(raycast_intersectionPoint.x * scale, canvas_height - (raycast_intersectionPoint.y * scale));
+    //ctx.closePath(); // Close the path
+    ctx.stroke();
+    ctx.setLineDash([]);
 }
 
 //Create box2d world object
@@ -342,7 +372,7 @@ function createWorld()
     //few lightweight boxes
     var free = {'restitution': 1.0, 'linearDamping': 1.0, 'angularDamping': 1.0, 'density': 0.2};
     obstacle1=createBox(world, 2, 2, 0.25, 0.25, free);
-    console.log("Obstacle 1:"+obstacle1.GetPosition().x);
+    //console.log("Obstacle 1:"+obstacle1.GetPosition().x);
     obstacle2=createBox(world, 5, 2, 0.5, 0.5, free);
 
     return world;
@@ -409,6 +439,12 @@ function game_loop()
         sendEvent("rightobstacle.distance",closest_right_obstacle);                
         last_known_closest_right_obstacle=closest_right_obstacle;
         //console.log("Right obstacle at:"+closest_right_obstacle);
+    }
+
+    if (closest_center_obstacle!==last_known_closest_center_obstacle){
+        sendEvent("centerobstacle.distance",closest_center_obstacle);                
+        last_known_closest_center_obstacle=closest_center_obstacle;
+        //console.log("CENTER obstacle at:"+closest_right_obstacle);
     }
 
     
@@ -604,9 +640,14 @@ function update_car()
     }
 
 
-    leftRay();
-    rightRay();
-
+    closest_left_obstacle=generateRay(3,car,left_car_raycast_origin,left_car_raycast_destiny,left_car_raycast_intersectionPoint,(-10/180)*Math.PI);
+    closest_right_obstacle=generateRay(3,car,right_car_raycast_origin,right_car_raycast_destiny,right_car_raycast_intersectionPoint,(10/180)*Math.PI);
+    closest_center_obstacle=generateRay(3,car,center_car_raycast_origin,center_car_raycast_destiny,center_car_raycast_intersectionPoint,0);
+            
+    
+    
+    
+   
 }
 
 
@@ -616,28 +657,26 @@ function update_car()
  * 
  */
 
-function rightRay() {
 
+function generateRay(rayLength,car,raycast_origin,raycast_destiny,raycast_intersectionPoint,angleFactor){
     
-    rayLength = 10;
-
     car_angle=car.body.GetAngle();
-    right_car_raycast_origin.x = car.body.GetPosition().x;
-    right_car_raycast_origin.y = car.body.GetPosition().y;
+    raycast_origin.x = car.body.GetPosition().x;
+    raycast_origin.y = car.body.GetPosition().y;
 
     //10 degrees aprox    
-    currentRayAngle = (car_angle*-1)+((10/180)*Math.PI); 
+    currentRayAngle = (car_angle*-1)+(angleFactor); 
     
     //calculate points of ray
-    right_car_raycast_destiny.x = right_car_raycast_origin.x + rayLength * Math.sin(currentRayAngle);
-    right_car_raycast_destiny.y = right_car_raycast_origin.y + rayLength * Math.cos(currentRayAngle);
+    raycast_destiny.x = raycast_origin.x + rayLength * Math.sin(currentRayAngle);
+    raycast_destiny.y = raycast_origin.y + rayLength * Math.cos(currentRayAngle);
 
     input = new b2RayCastInput();
     output = new b2RayCastOutput();
 
 
-    input.p1 = right_car_raycast_origin;
-    input.p2 = right_car_raycast_destiny;
+    input.p1 = raycast_origin;
+    input.p2 = raycast_destiny;
     input.maxFraction = 1;
     closestFraction = 1;
 
@@ -655,60 +694,12 @@ function rightRay() {
 
     }
 
-    right_car_raycast_intersectionPoint.x = right_car_raycast_origin.x + closestFraction * (right_car_raycast_destiny.x - right_car_raycast_origin.x);
-    right_car_raycast_intersectionPoint.y = right_car_raycast_origin.y + closestFraction * (right_car_raycast_destiny.y - right_car_raycast_origin.y);
+    raycast_intersectionPoint.x = raycast_origin.x + closestFraction * (raycast_destiny.x - raycast_origin.x);
+    raycast_intersectionPoint.y = raycast_origin.y + closestFraction * (raycast_destiny.y - raycast_origin.y);
 
-    closest_right_obstacle=closestFraction;
-    //console.log("--->Right Closest fraction:"+closestFraction);
-
+    return closestFraction;    
 }
 
-function leftRay() {
-
-    
-    rayLength = 10;
-
-    car_angle=car.body.GetAngle();
-    left_car_raycast_origin.x = car.body.GetPosition().x;
-    left_car_raycast_origin.y = car.body.GetPosition().y;
-
-    //10 degrees aprox    
-    currentRayAngle = (car_angle*-1)+((-10/180)*Math.PI); 
-    
-    //calculate points of ray
-    left_car_raycast_destiny.x = left_car_raycast_origin.x + rayLength * Math.sin(currentRayAngle);
-    left_car_raycast_destiny.y = left_car_raycast_origin.y + rayLength * Math.cos(currentRayAngle);
-
-    input = new b2RayCastInput();
-    output = new b2RayCastOutput();
-
-
-    input.p1 = left_car_raycast_origin;
-    input.p2 = left_car_raycast_destiny;
-    input.maxFraction = 1;
-    closestFraction = 1;
-
-    var b = new b2BodyDef();
-    var f = new b2FixtureDef();
-    for (b = world.GetBodyList(); b; b = b.GetNext()) {
-        for (f = b.GetFixtureList(); f; f = f.GetNext()) {
-            if (!f.RayCast(output, input))
-                continue;
-            else if (output.fraction < closestFraction) {
-                closestFraction = output.fraction;
-                intersectionNormal = output.normal;
-            }
-        }
-
-    }
-
-    left_car_raycast_intersectionPoint.x = left_car_raycast_origin.x + closestFraction * (left_car_raycast_destiny.x - left_car_raycast_origin.x);
-    left_car_raycast_intersectionPoint.y = left_car_raycast_origin.y + closestFraction * (left_car_raycast_destiny.y - left_car_raycast_origin.y);
-
-    closest_left_obstacle=closestFraction;
-    //console.log("--->Left Closest fraction:"+closestFraction);
-
-}
 
 /*----------------------------*/
 
@@ -721,7 +712,7 @@ var connectCallback = function () {
     
     stompClient.subscribe('/topic/command/'+randomIdentifier,
             function (data) {
-                console.log("GOT COMMAND:" + data);
+                //console.log("GOT COMMAND:" + data);
                 var message=JSON.parse(data.body);                
                 game.rover_commands(message.commandCode);
                 
@@ -768,7 +759,7 @@ sendEvent = function (name,value) {
                 if (!plan_finished && !plan_execution_error){
                     var jsessionId = randomIdentifier;                
                     var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
-                    console.log('>>>>>Sending '+jsonstr)
+                    //console.log('>>>>>Sending '+jsonstr)
                     stompClient.send("/app/event", {}, jsonstr);                    
                 }
             };

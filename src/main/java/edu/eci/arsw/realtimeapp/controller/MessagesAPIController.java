@@ -208,7 +208,7 @@ public class MessagesAPIController {
                 Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
             }
         }
-        if (re.getName().equals("leftobstacle.distance")){
+        else if (re.getName().equals("leftobstacle.distance")){
             try {                
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
                 bw.write("leftobstacle.distance,"+re.getValue()+"\n");
@@ -218,7 +218,7 @@ public class MessagesAPIController {
                 Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
             }
         }
-        if (re.getName().equals("rightobstacle.distance")){
+        else if (re.getName().equals("rightobstacle.distance")){
             try {                
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
                 bw.write("rightobstacle.distance,"+re.getValue()+"\n");
@@ -228,6 +228,17 @@ public class MessagesAPIController {
                 Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
             }
         }
+        else if (re.getName().equals("centerobstacle.distance")){
+            try {                
+                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
+                bw.write("centerobstacle.distance,"+re.getValue()+"\n");
+                bw.flush();
+                
+            } catch (IOException ex) {
+                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }
+        }
+        
         
         
         
