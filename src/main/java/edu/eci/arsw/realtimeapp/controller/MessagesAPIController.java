@@ -6,10 +6,12 @@ import edu.eci.arsw.realtimeapp.interop.FinishedPlanCallback;
 import edu.eci.arsw.realtimeapp.interop.PlanExecutionFailureCallback;
 import edu.eci.arsw.realtimeapp.interop.PlexilCompiler;
 import edu.eci.arsw.realtimeapp.interop.PlexilExecLauncher;
+import edu.eci.arsw.realtimeapp.interop.ProcessKillException;
 import edu.eci.arsw.realtimeapp.model.Command;
 import edu.eci.arsw.realtimeapp.model.ExecutionRequest;
 import edu.eci.arsw.realtimeapp.model.Message;
 import edu.eci.arsw.realtimeapp.model.RobotEvent;
+import edu.eci.arsw.realtimeapp.model.UEThreadAbortRequest;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,6 +20,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.Hashtable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -50,8 +53,10 @@ public class MessagesAPIController {
     
     
     //Process id, OutputStream
-    private ConcurrentHashMap<String,OutputStream> openOutputStreams;
-    private ConcurrentHashMap<String,BufferedWriter> openOutputStreamsWriters;
+    private final ConcurrentHashMap<String,OutputStream> openOutputStreams;
+    private final ConcurrentHashMap<String,BufferedWriter> openOutputStreamsWriters;
+    private final ConcurrentHashMap<String,Process> processesMap;
+    private final ConcurrentHashMap<String,Long> processesIdMap;
     
     @Autowired 
     private SimpMessagingTemplate template;  
@@ -70,6 +75,8 @@ public class MessagesAPIController {
     public MessagesAPIController(){
         openOutputStreams=new ConcurrentHashMap<>();
         openOutputStreamsWriters=new ConcurrentHashMap<>();
+        processesMap=new ConcurrentHashMap<>();
+        processesIdMap=new ConcurrentHashMap<>();
         /*new Thread(){
             public void run(){
                 while (true) {
@@ -107,7 +114,45 @@ public class MessagesAPIController {
         template.convertAndSend("/topic/newmessage", new Command(m.getBody()));
     }
     
+    /**
+     * Abort message handler
+     * NOTE: This implementation is not cross-platform (only work in Unix)
+     */
+    @MessageMapping("/abort") 
+    public void abortPlan(SimpMessageHeaderAccessor headerAccessor,final UEThreadAbortRequest er) {
+        System.out.println("GOT ABORT COMMAND FROM "+er.getClientSessionId());        
+        if (processesIdMap.containsKey(er.getClientSessionId())){
+            long plexil_pid=processesIdMap.get(er.getClientSessionId());            
+            try {
+                PlexilExecLauncher.getInstance().killProcess(plexil_pid);
+            } catch (ProcessKillException ex) {
+                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
+                //template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
+            }            
+        }
+        else{
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, "PROCESS NOT FOUND!");
+        }
+        
+    }
     
+
+    private static long getPidOfProcess(Process p) {
+        long pid = -1;
+
+        try {
+            if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+                Field f = p.getClass().getDeclaredField("pid");
+                f.setAccessible(true);
+                pid = f.getLong(p);
+                f.setAccessible(false);
+            }
+        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+            pid = -1;
+        }
+        return pid;
+    }
+
     
     @MessageMapping("/execute") 
     public void execute(SimpMessageHeaderAccessor headerAccessor,final ExecutionRequest er) {
@@ -153,11 +198,14 @@ public class MessagesAPIController {
                         public void execute(String msg) {
                             template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg,Message.PLAN_EXECUTION_ERROR));            
                         }
-                    });
+                    });  
+            System.out.println(">>>> PROCESS CREATED "+getPidOfProcess(p));
             
             OutputStream os=p.getOutputStream();
             openOutputStreams.put(er.getClientSessionId(), os);
             openOutputStreamsWriters.put(er.getClientSessionId(), new BufferedWriter(new OutputStreamWriter(os)));
+            processesMap.put(er.getClientSessionId(), p);
+            processesIdMap.put(er.getClientSessionId(), getPidOfProcess(p));
             
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
@@ -197,52 +245,19 @@ public class MessagesAPIController {
     @MessageMapping("/event") 
     public void receiveEvent(SimpMessageHeaderAccessor headerAccessor,RobotEvent re) {
         //System.out.println("FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re);
-        
-        if (re.getName().equals("pos.updated")){
+        if (re.getName().equals("encoded.sensor.data")){
             try {
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
-                bw.write("pos.updated,"+re.getValue()+"\n");
+                bw.write(re.getValue()+"\n");
                 bw.flush();
                 
             } catch (IOException ex) {
                 Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
-            }
+            }            
         }
-        else if (re.getName().equals("leftobstacle.distance")){
-            try {                
-                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
-                bw.write("leftobstacle.distance,"+re.getValue()+"\n");
-                bw.flush();
-                
-            } catch (IOException ex) {
-                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
-            }
+        else{
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, "Unsupported event: encoded.sensor.data");
         }
-        else if (re.getName().equals("rightobstacle.distance")){
-            try {                
-                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
-                bw.write("rightobstacle.distance,"+re.getValue()+"\n");
-                bw.flush();
-                
-            } catch (IOException ex) {
-                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
-            }
-        }
-        else if (re.getName().equals("centerobstacle.distance")){
-            try {                
-                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
-                bw.write("centerobstacle.distance,"+re.getValue()+"\n");
-                bw.flush();
-                
-            } catch (IOException ex) {
-                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
-            }
-        }
-        
-        
-        
-        
-        
         
     }    
     

@@ -40,6 +40,30 @@
                 var jsonstr = JSON.stringify({'destiny': 'servidor', 'body': '0'});
                 stompClient.send("/app/rutaMensajesEntrantes", {}, jsonstr);
             };
+
+            abort = function(){
+                var jsessionId = randomIdentifier;                
+                var jsonstr = JSON.stringify({'clientSessionId': jsessionId});
+                console.log('Sending abort message!');
+                stompClient.send("/app/abort", {}, jsonstr);                
+            };
+
+            function goodbye(e) {
+                if (!e)
+                    e = window.event;
+                //e.cancelBubble is supported by IE - this will kill the bubbling process.
+                abort();
+                e.cancelBubble = true;
+                e.returnValue = 'You sure you want to leave?'; //This is displayed on the dialog
+
+                //e.stopPropagation works in Firefox.
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }
+            window.onbeforeunload = goodbye;
+
         </script>        
 
 
@@ -64,61 +88,61 @@
             <div class="tab-content">
                 <div id="sectionA" class="tab-pane fade in active">
 
-                    <canvas id="canvas" width='800' height='600' style="background-color:#333;"></canvas>
+                    <canvas id="canvas" width='1200' height='600' style="background-color:#333;"></canvas>
 
                 </div>
                 <div id="sectionB" class="tab-pane fade">
-                    <div id="editor" style="position: relative;width: 800px; height: 600px;">
+                    <div id="editor" style="position: relative;width: 1200px; height: 600px;">
 
 
-//Set front wheels angle [-30..30]
-Command TurnFrontWheels(Integer);
+                        //Set front wheels angle [-30..30]
+                        Command TurnFrontWheels(Integer);
 
-//Set rear wheels angle [-30..30]
-Command TurnRearWheels(Integer); 
+                        //Set rear wheels angle [-30..30]
+                        Command TurnRearWheels(Integer); 
 
-//Move forward with a given power level [0..100]
-Command MoveForward(Integer); 
+                        //Move forward with a given power level [0..100]
+                        Command MoveForward(Integer); 
 
-//Move backwards with a given power level [0..100]
-Command MoveBackward(Integer); 
+                        //Move backwards with a given power level [0..100]
+                        Command MoveBackward(Integer); 
 
-//Stop
-Command StopEngine();
+                        //Stop
+                        Command StopEngine();
 
-Command pprint(...);
+                        Command pprint(...);
 
-CommandsTest:{
-    Concurrence{
-        TF:{
-            TurnFrontWheels(30);
-        }
-        
-        MF:{            
-            MoveForward(3);
-        }       
-        
-        HandleLeftSensor: {    
-            Start Lookup(LeftSonarMeasuredDistance)<1;
-            Repeat true;        
-            pprint("Collision at left");
-        }
+                        CommandsTest:{
+                        Concurrence{
+                        TF:{
+                        TurnFrontWheels(30);
+                        }
 
-        Safe:{
-            Start Lookup(LeftSonarMeasuredDistance)==1 && Lookup(RightSonarMeasuredDistance)==1;
-            Repeat true;
-            pprint("SAFE!");
-        }        
-        
-        HandleRightSensor: {    
-            Start Lookup(RightSonarMeasuredDistance)<1;
-            Repeat true;
-            pprint("Collision at right");
-        }
+                        MF:{            
+                        MoveForward(3);
+                        }       
 
-        
-    }
-}
+                        HandleLeftSensor: {    
+                        Start Lookup(LeftSonarMeasuredDistance)<1;
+                        Repeat true;        
+                        pprint("Collision at left");
+                        }
+
+                        Safe:{
+                        Start Lookup(LeftSonarMeasuredDistance)==1 && Lookup(RightSonarMeasuredDistance)==1;
+                        Repeat true;
+                        //pprint("SAFE!");
+                        }        
+
+                        HandleRightSensor: {    
+                        Start Lookup(RightSonarMeasuredDistance)<1;
+                        Repeat true;
+                        pprint("Collision at right");
+                        }
+
+
+                        }
+                        }
                     </div>
 
                 </div>
@@ -153,8 +177,11 @@ CommandsTest:{
         <div style="text-align:center;">
             <button onclick="compile()" >Compile</button>                
             <button onclick="execute()" >Execute</button>                
+            <button onclick="abort()" >Abort</button>                
         </div>
-
+        <script src="js/app/worlddef.js"></script>    
+        <script src="js/app/simparameters.js"></script>    
+        <script src="js/app/dataencoder.js"></script>    
         <script src="js/app/roversim.js"></script>    
 
 

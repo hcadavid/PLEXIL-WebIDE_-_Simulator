@@ -4,15 +4,19 @@
 
 
 /*
- Source code adapted by Hector Cadavid.
+ Source code adapted by Hector Cadavid. - hector.cadavid@escuelaing.edu.co
  Original sources: Racing car example, author: Silver Moon (m00n.silv3r@gmail.com)
  */
 
 var randomIdentifier=Math.random().toString(36).slice(2);
-var carxpos=3;
-var carypos=3;
 
+var obstacles=[];
 
+//sonar sensors maximum distance range. Distance from the 
+//ray's generation point is included
+var center_ray_lenght=4.27;
+var left_ray_lenght=4.31;
+var right_ray_lenght=4.31;
 
 //Get the objects of Box2d Library
 var b2Vec2 = Box2D.Common.Math.b2Vec2
@@ -59,6 +63,7 @@ var closest_center_obstacle=1;
 var last_known_closest_right_obstacle=1;
 var last_known_closest_left_obstacle=1;
 var last_known_closest_center_obstacle=1;
+
 
 
 var game = {
@@ -259,11 +264,8 @@ var carbody;
 var min_rotation_unit = Math.PI / 180;
 
 
-//1 metre of box2d length becomes 100 pixels on canvas
-var scale = 100;
-
-var obstacle1;
-var obstacle2;
+//1 metre of box2d length becomes 50 pixels on canvas
+var scale = 50;
 
 //The car object
 var car = {
@@ -287,6 +289,13 @@ var car = {
     'gear': 1
 };
 
+
+
+function draw_water_drop(){
+    //car.body.GetPosition().x;
+
+}
+
 /*
  Draw a world
  this method is called in a loop to redraw the world
@@ -306,8 +315,7 @@ function redraw_world(world, context)
         
     ctx.strokeStyle = "rgb(255, 255, 255)";
 
-
-    //draw_ray(ctx,left_car_raycast_origin,scale,canvas_height,left_car_raycast_intersectionPoint);
+    
     
     ctx.setLineDash([10]);
     
@@ -371,10 +379,12 @@ function createWorld()
 
     //few lightweight boxes
     var free = {'restitution': 1.0, 'linearDamping': 1.0, 'angularDamping': 1.0, 'density': 0.2};
-    obstacle1=createBox(world, 2, 2, 0.25, 0.25, free);
-    //console.log("Obstacle 1:"+obstacle1.GetPosition().x);
-    obstacle2=createBox(world, 5, 2, 0.5, 0.5, free);
+    
+    for (var i=0;i<obstacles_def.length;i++){
+        obstacles.push(createBox(world, obstacles_def[i].x, obstacles_def[i].y, obstacles_def[i].width, obstacles_def[i].height, free));
+    }
 
+    
     return world;
 }
 
@@ -402,7 +412,7 @@ function createBox(world, x, y, width, height, options)
     fix_def.shape = new b2PolygonShape();
 
     fix_def.shape.SetAsBox(width, height);
-
+    
     body_def.position.Set(x, y);
 
     body_def.linearDamping = options.linearDamping;
@@ -428,25 +438,27 @@ function game_loop()
     var time_step = 1.0 / fps;
 
     update_car();
+    
         
     if (closest_left_obstacle!==last_known_closest_left_obstacle){
-        sendEvent("leftobstacle.distance",closest_left_obstacle);
+        encodeAndSend(LEFT_SENSOR_ID,Math.floor(closest_left_obstacle*proximity_sensor_range));
         last_known_closest_left_obstacle=closest_left_obstacle;
-        //console.log("Left obstacle at:"+closest_left_obstacle);
+        console.log("Left obstacle at:"+(closest_left_obstacle*proximity_sensor_range));
     }
-
     if (closest_right_obstacle!==last_known_closest_right_obstacle){
-        sendEvent("rightobstacle.distance",closest_right_obstacle);                
+        encodeAndSend(RIGHT_SENSOR_ID,Math.floor(closest_right_obstacle*proximity_sensor_range));
         last_known_closest_right_obstacle=closest_right_obstacle;
-        //console.log("Right obstacle at:"+closest_right_obstacle);
+        console.log("Encoding and sending:"+(closest_right_obstacle*proximity_sensor_range));
     }
-
     if (closest_center_obstacle!==last_known_closest_center_obstacle){
-        sendEvent("centerobstacle.distance",closest_center_obstacle);                
+        encodeAndSend(CENTER_SENSOR_ID,Math.floor(closest_center_obstacle*proximity_sensor_range));
         last_known_closest_center_obstacle=closest_center_obstacle;
-        //console.log("CENTER obstacle at:"+closest_right_obstacle);
+        console.log("CENTER obstacle at:"+(closest_center_obstacle*proximity_sensor_range));
     }
 
+    console.log("Angle"+car.body.GetAngle());
+
+    
     
     /*if (Math.abs(car.body.GetPosition().x-carxpos) >= updateDelta){
         carxpos=car.body.GetPosition().x;    
@@ -464,8 +476,17 @@ function game_loop()
     redraw_world(world, ctx);
 
     //call this function again after 10 seconds
-    setTimeout('game_loop()', 5000 / 60);
+    setTimeout('game_loop()', 2000 / 60);
 }
+
+var encodeAndSend=function(sensorId,value){
+    var encoded_sensor_values=[];   
+    encodeData(value,sensorId,encoded_sensor_values);        
+    sendEvent("encoded.sensor.data",encoded_sensor_values[0]);
+    sendEvent("encoded.sensor.data",encoded_sensor_values[1]);
+    sendEvent("encoded.sensor.data",encoded_sensor_values[2]);    
+    
+};
 
 
 // main entry point
@@ -483,8 +504,8 @@ $(function ()
     //first create the world
     world = createWorld();
 
-    create_car();
-
+    _thecar=create_car();
+         
     //Start the Game Loop!!!!!!!
     game_loop();
 });
@@ -501,23 +522,24 @@ function create_car()
     car_pos = new b2Vec2(carxpos, carypos);
     
     
-    car_dim = new b2Vec2(0.15, 0.35);
+    
+    car_dim = new b2Vec2(0.35, 0.54);
     car.body = createBox(world, car_pos.x, car_pos.y, car_dim.x, car_dim.y, {'linearDamping': 10.0, 'angularDamping': 10.0});
-
-    var wheel_dim = new b2Vec2(0.045, 0.1);
+            
+    var wheel_dim = new b2Vec2(0.07, 0.14);
     //wheel_dim.Multiply(0.2);
 
     //front wheels
-    left_wheel = createBox(world, car_pos.x - car_dim.x, car_pos.y + car_dim.y - 0.07, wheel_dim.x, wheel_dim.y, {});
-    right_wheel = createBox(world, car_pos.x + car_dim.x, car_pos.y + car_dim.y - 0.07, wheel_dim.x, wheel_dim.y, {});
+    left_wheel = createBox(world, car_pos.x - car_dim.x, car_pos.y + car_dim.y - 0.08, wheel_dim.x, wheel_dim.y, {});
+    right_wheel = createBox(world, car_pos.x + car_dim.x, car_pos.y + car_dim.y - 0.08, wheel_dim.x, wheel_dim.y, {});
 
     //center wheels
     left_center_wheel = createBox(world, car_pos.x - car_dim.x, car_pos.y, wheel_dim.x, wheel_dim.y, {});
     right_center_wheel = createBox(world, car_pos.x + car_dim.x, car_pos.y, wheel_dim.x, wheel_dim.y, {});
 
     //rear wheels
-    left_rear_wheel = createBox(world, car_pos.x - car_dim.x, car_pos.y - car_dim.y + 0.07, wheel_dim.x, wheel_dim.y, {});
-    right_rear_wheel = createBox(world, car_pos.x + car_dim.x, car_pos.y - car_dim.y + 0.07, wheel_dim.x, wheel_dim.y, {});
+    left_rear_wheel = createBox(world, car_pos.x - car_dim.x, car_pos.y - car_dim.y + 0.08, wheel_dim.x, wheel_dim.y, {});
+    right_rear_wheel = createBox(world, car_pos.x + car_dim.x, car_pos.y - car_dim.y + 0.08, wheel_dim.x, wheel_dim.y, {});
 
     var front_wheels = {'left_wheel': left_wheel, 'right_wheel': right_wheel};
 
@@ -584,11 +606,17 @@ function create_car()
         car[i + '_joint'] = world.CreateJoint(joint_def);
     }
 
+    car.body.SetAngle(initialCarAngle);
+    
+    
+
     car.left_wheel = left_wheel;
     car.right_wheel = right_wheel;
     car.left_rear_wheel = left_rear_wheel;
     car.right_rear_wheel = right_rear_wheel;
 
+    
+    
     return car;
 }
 
@@ -640,9 +668,11 @@ function update_car()
     }
 
 
-    closest_left_obstacle=generateRay(3,car,left_car_raycast_origin,left_car_raycast_destiny,left_car_raycast_intersectionPoint,(-10/180)*Math.PI);
-    closest_right_obstacle=generateRay(3,car,right_car_raycast_origin,right_car_raycast_destiny,right_car_raycast_intersectionPoint,(10/180)*Math.PI);
-    closest_center_obstacle=generateRay(3,car,center_car_raycast_origin,center_car_raycast_destiny,center_car_raycast_intersectionPoint,0);
+    closest_left_obstacle=generateRay(left_ray_lenght,car,left_car_raycast_origin,left_car_raycast_destiny,left_car_raycast_intersectionPoint,(-20/180)*Math.PI);
+    
+    closest_right_obstacle=generateRay(right_ray_lenght,car,right_car_raycast_origin,right_car_raycast_destiny,right_car_raycast_intersectionPoint,(20/180)*Math.PI);
+    
+    closest_center_obstacle=generateRay(center_ray_lenght,car,center_car_raycast_origin,center_car_raycast_destiny,center_car_raycast_intersectionPoint,0);
             
     
     
@@ -680,9 +710,12 @@ function generateRay(rayLength,car,raycast_origin,raycast_destiny,raycast_inters
     input.maxFraction = 1;
     closestFraction = 1;
 
+  
     var b = new b2BodyDef();
     var f = new b2FixtureDef();
-    for (b = world.GetBodyList(); b; b = b.GetNext()) {
+
+    for (var i = 0; i < obstacles.length; i++) {
+        b = obstacles[i];
         for (f = b.GetFixtureList(); f; f = f.GetNext()) {
             if (!f.RayCast(output, input))
                 continue;
@@ -691,8 +724,9 @@ function generateRay(rayLength,car,raycast_origin,raycast_destiny,raycast_inters
                 intersectionNormal = output.normal;
             }
         }
-
     }
+    
+
 
     raycast_intersectionPoint.x = raycast_origin.x + closestFraction * (raycast_destiny.x - raycast_origin.x);
     raycast_intersectionPoint.y = raycast_origin.y + closestFraction * (raycast_destiny.y - raycast_origin.y);
