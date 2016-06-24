@@ -504,6 +504,35 @@ $(function ()
 });
 
 
+function reset(){
+    
+    
+    game.ctx = ctx = $('#canvas').get(0).getContext('2d');
+    var canvas = $('#canvas');
+    
+    game.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    game.canvas_width = canvas_width = parseInt(canvas.width());
+    game.canvas_height = canvas_height = parseInt(canvas.height());
+
+    game.screen_width = game.canvas_width / scale;
+    game.screen_height = game.canvas_height / scale;
+
+    //first create the world
+    world = createWorld();
+
+    _thecar=create_car();
+    car.stop_engine();
+    steering_angle = 0;  
+    rear_steering_angle = 0;
+         
+    //Start the Game Loop!!!!!!!
+    game_loop();
+}
+
+
+
+
 function createSmallBox(v) {
     createBox(world, (game.screen_width / 2), (game.screen_height / 2), 0.1, 0.1, {'type': b2Body.b2_staticBody, 'restitution': 0.5});
 
