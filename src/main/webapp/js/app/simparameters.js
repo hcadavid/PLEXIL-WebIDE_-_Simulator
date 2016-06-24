@@ -8,3 +8,4 @@ var proximity_sensor_range=400;
 var LEFT_SENSOR_ID=0;
 var CENTER_SENSOR_ID=1;
 var RIGHT_SENSOR_ID=2;
+var HEADING_ID=3;

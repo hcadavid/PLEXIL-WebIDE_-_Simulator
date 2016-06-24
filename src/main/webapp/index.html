@@ -92,57 +92,52 @@
 
                 </div>
                 <div id="sectionB" class="tab-pane fade">
+                    
                     <div id="editor" style="position: relative;width: 1200px; height: 600px;">
 
+//Set front wheels angle [-30..30]
+Command TurnFrontWheels(Integer);
 
-                        //Set front wheels angle [-30..30]
-                        Command TurnFrontWheels(Integer);
+//Set rear wheels angle [-30..30]
+Command TurnRearWheels(Integer); 
 
-                        //Set rear wheels angle [-30..30]
-                        Command TurnRearWheels(Integer); 
+//Move forward with a given power level [0..100]
+Command MoveForward(Integer); 
 
-                        //Move forward with a given power level [0..100]
-                        Command MoveForward(Integer); 
+//Move backwards with a given power level [0..100]
+Command MoveBackward(Integer); 
 
-                        //Move backwards with a given power level [0..100]
-                        Command MoveBackward(Integer); 
+//Stop
+Command Stop();
 
-                        //Stop
-                        Command StopEngine();
+Command pprint(...);
 
-                        Command pprint(...);
+ObstacleAvoid:
+{
+  Integer steps=0;
 
-                        CommandsTest:{
-                        Concurrence{
-                        TF:{
-                        TurnFrontWheels(30);
-                        }
+  Concurrence{    
+     
+    Integer frontAngle=0;
+        
+    MF:{            
+        MoveForward(3);
+        TurnFrontWheels(30);
+    }   
 
-                        MF:{            
-                        MoveForward(3);
-                        }       
+    StraightAt45:{
+        Start Lookup(Heading)==135;        
+        TurnFrontWheels(0);
+        frontAngle=0;
+    }
 
-                        HandleLeftSensor: {    
-                        Start Lookup(LeftSonarMeasuredDistance)<1;
-                        Repeat true;        
-                        pprint("Collision at left");
-                        }
-
-                        Safe:{
-                        Start Lookup(LeftSonarMeasuredDistance)==1 && Lookup(RightSonarMeasuredDistance)==1;
-                        Repeat true;
-                        //pprint("SAFE!");
-                        }        
-
-                        HandleRightSensor: {    
-                        Start Lookup(RightSonarMeasuredDistance)<1;
-                        Repeat true;
-                        pprint("Collision at right");
-                        }
-
-
-                        }
-                        }
+    ResumeAt135:{
+        Start Lookup(Heading)==140;
+        TurnFrontWheels(-30);
+    }
+}
+}
+  
                     </div>
 
                 </div>
@@ -161,8 +156,12 @@
 
 
         <script>
+           
+           //$('#editor').load("defaultplan.txt");           
             var editor = ace.edit("editor");
             editor.setTheme("ace/theme/twilight");
+
+            
 
             $('#errors').dialog({autoOpen: false});
 
@@ -170,6 +169,12 @@
                 $('#errors span').text(msg);
                 $('#errors').dialog('open');
             };
+            
+            
+            
+            
+             
+            
 
         </script>
 

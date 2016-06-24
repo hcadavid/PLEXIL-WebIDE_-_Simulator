@@ -1,0 +1,34 @@
+//Set front wheels angle [-30..30]
+Command TurnFrontWheels(Integer);
+
+//Set rear wheels angle [-30..30]
+Command TurnRearWheels(Integer); 
+
+//Move forward with a given power level [0..100]
+Command MoveForward(Integer); 
+
+//Move backwards with a given power level [0..100]
+Command MoveBackward(Integer); 
+
+//Stop
+Command Stop();
+
+Command pprint(...);
+
+ObstacleAvoid:
+{
+  Integer steps=0;
+
+  Concurrence{    
+        
+    MF:{            
+        MoveForward(3);
+        TurnFrontWheels(30);
+    }   
+
+    StraightAt45:{
+        Start Lookup(Heading)=45;
+        TurnFrontWheels(0);
+    }
+  }
+}

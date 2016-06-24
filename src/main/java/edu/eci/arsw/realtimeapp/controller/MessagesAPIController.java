@@ -125,33 +125,21 @@ public class MessagesAPIController {
             long plexil_pid=processesIdMap.get(er.getClientSessionId());            
             try {
                 PlexilExecLauncher.getInstance().killProcess(plexil_pid);
+                processesIdMap.remove(er.getClientSessionId());
+                processesMap.remove(er.getClientSessionId());
+                System.out.println("KILLED PROCESS "+plexil_pid);        
             } catch (ProcessKillException ex) {
                 Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
                 //template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
             }            
         }
         else{
-            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, "PROCESS NOT FOUND!");
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, "NO RUNNING PLEXIL PROCESS FOUND FOR CLIENT SESSION "+er.getClientSessionId());
         }
         
     }
     
 
-    private static long getPidOfProcess(Process p) {
-        long pid = -1;
-
-        try {
-            if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
-                Field f = p.getClass().getDeclaredField("pid");
-                f.setAccessible(true);
-                pid = f.getLong(p);
-                f.setAccessible(false);
-            }
-        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-            pid = -1;
-        }
-        return pid;
-    }
 
     
     @MessageMapping("/execute") 
@@ -267,6 +255,25 @@ public class MessagesAPIController {
         System.out.println(env.getProperty("plexilhome"));
         return "REST API OK"+session.getId();                
     }
+ 
+    private static long getPidOfProcess(Process p) {
+        long pid = -1;
+
+        try {
+            if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+                Field f = p.getClass().getDeclaredField("pid");
+                f.setAccessible(true);
+                pid = f.getLong(p);
+                f.setAccessible(false);
+            }
+        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+            pid = -1;
+        }
+        return pid;
+    }
+    
+
+
     
 }
 

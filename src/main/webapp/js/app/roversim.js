@@ -64,6 +64,10 @@ var last_known_closest_right_obstacle=1;
 var last_known_closest_left_obstacle=1;
 var last_known_closest_center_obstacle=1;
 
+var current_heading=0;
+var last_known_heading=0;
+
+var communication_channel_ready=false;
 
 
 var game = {
@@ -77,30 +81,20 @@ var game = {
         }
         if (code === "n")
         {
-            steering_angle = -20*(Math.PI/180);
+            steering_angle = -15*(Math.PI/180);
             console.log('steering angle:'+steering_angle);
         }
         if (code === "o")
         {
-            steering_angle = -10*(Math.PI/180);     
+            steering_angle = 0;        
             console.log('steering angle:'+steering_angle);
         }
         if (code === "p")
         {
-            steering_angle = 0;        
+            steering_angle = 15*(Math.PI/180);
             console.log('steering angle:'+steering_angle);
         }
         if (code === "q")
-        {
-            steering_angle = 10*(Math.PI/180);
-            console.log('steering angle:'+steering_angle);
-        }
-        if (code === "r")
-        {
-            steering_angle = 20*(Math.PI/180); 
-            console.log('steering angle:'+steering_angle);
-        }
-        if (code === "s")
         {
             steering_angle = 30*(Math.PI/180);
             console.log('steering angle:'+steering_angle);
@@ -115,32 +109,22 @@ var game = {
         }
         if (code === "N")
         {
-            rear_steering_angle = -20*(Math.PI/180);
+            rear_steering_angle = -15*(Math.PI/180);
             console.log('steering angle:'+rear_steering_angle);
         }
         if (code === "O")
         {
-            rear_steering_angle = -10*(Math.PI/180);     
+            rear_steering_angle = 0;        
             console.log('steering angle:'+rear_steering_angle);
         }
         if (code === "P")
         {
-            rear_steering_angle = 0;        
+            rear_steering_angle = 15*(Math.PI/180);
             console.log('steering angle:'+rear_steering_angle);
         }
         if (code === "Q")
         {
-            rear_steering_angle = 10*(Math.PI/180);
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "R")
-        {
-            rear_steering_angle = 20*(Math.PI/180); 
-            console.log('steering angle:'+rear_steering_angle);
-        }
-        if (code === "S")
-        {
-            rear_steering_angle = 30*(Math.PI/180);
+            rear_steering_angle = 30*(Math.PI/180); 
             console.log('steering angle:'+rear_steering_angle);
         }
         
@@ -455,9 +439,18 @@ function game_loop()
         last_known_closest_center_obstacle=closest_center_obstacle;
         console.log("CENTER obstacle at:"+(closest_center_obstacle*proximity_sensor_range));
     }
+    
+    current_heading=car.body.GetAngle();
+    
+    if (Math.abs(current_heading-last_known_heading)>0.001){
+        last_known_heading=current_heading;
+        if (communication_channel_ready){
+            encodeAndSend(HEADING_ID,Math.abs(Math.round(((current_heading*(180/Math.PI))%360))));
+            //console.log("Sending:"+Math.round(((current_heading*(180/Math.PI))%360)));
 
-    console.log("Angle"+car.body.GetAngle());
-
+            
+        } 
+    }
     
     
     /*if (Math.abs(car.body.GetPosition().x-carxpos) >= updateDelta){
@@ -775,7 +768,9 @@ var connectCallback = function () {
                 //var message = JSON.parse(data.body);
                 //console.log("got:" + message.destiny + "," + message.body);
             }
-    );    
+    ); 
+    
+    communication_channel_ready = true;
     
 };
 
@@ -786,6 +781,7 @@ var errorCallback = function (error) {
 
 // Connect to server via websocket
 stompClient.connect("guest", "guest", connectCallback, errorCallback);
+
 
 sendEvent = function (name,value) {
     
