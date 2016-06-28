@@ -11,6 +11,7 @@
 var randomIdentifier=Math.random().toString(36).slice(2);
 
 var obstacles=[];
+var seeds=[];
 
 //sonar sensors maximum distance range. Distance from the 
 //ray's generation point is included
@@ -54,8 +55,6 @@ var right_car_raycast_origin = new b2Vec2( 0,0);
 var right_car_raycast_destiny = new b2Vec2();
 var right_car_raycast_intersectionPoint=new b2Vec2();
 
-var obstacles_info={closest_right_obstacle:1,closest_left_obstacle:1,closest_center_obstacle:1};
-
 var closest_right_obstacle=1;
 var closest_left_obstacle=1;
 var closest_center_obstacle=1;
@@ -97,11 +96,8 @@ var game = {
         if (code === "q")
         {
             steering_angle = 30*(Math.PI/180);
-            console.log('steering angle:'+steering_angle);
+            console.log('steering angle:'+steering_angle);            
         }
-        
-        
-        
         if (code === "M")
         {
             rear_steering_angle = -30*(Math.PI/180);
@@ -127,7 +123,11 @@ var game = {
             rear_steering_angle = 30*(Math.PI/180); 
             console.log('steering angle:'+rear_steering_angle);
         }
-        
+        if (code === "v")
+        {            
+            seeds.push({"x":(car.body.GetPosition().x*scale),"y":(canvas_height -(car.body.GetPosition().y*scale))});        
+        }        
+            
         
         
         //0: STOP
@@ -327,6 +327,17 @@ function redraw_world(world, context)
     
     ctx.setLineDash([]);
 
+    //draw planted seeds
+    for (i=0;i<seeds.length;i++){
+        ctx.beginPath();
+        ctx.arc(seeds[i].x, seeds[i].y, 3, 0, 2 * Math.PI, false);
+        context.fillStyle = 'white';
+        context.fill();
+    }
+    
+    
+
+
 
 }
 
@@ -447,8 +458,6 @@ function game_loop()
         if (communication_channel_ready){
             encodeAndSend(HEADING_ID,Math.abs(Math.round(((current_heading*(180/Math.PI))%360))));
             //console.log("Sending:"+Math.round(((current_heading*(180/Math.PI))%360)));
-
-            
         } 
     }
     
@@ -472,13 +481,14 @@ function game_loop()
     setTimeout('game_loop()', 2000 / 60);
 }
 
-var encodeAndSend=function(sensorId,value){
-    var encoded_sensor_values=[];   
-    encodeData(value,sensorId,encoded_sensor_values);        
-    sendEvent("encoded.sensor.data",encoded_sensor_values[0]);
-    sendEvent("encoded.sensor.data",encoded_sensor_values[1]);
-    sendEvent("encoded.sensor.data",encoded_sensor_values[2]);    
+var encodeAndSend = function (sensorId, value) {
+    var encoded_sensor_values = [];
+    encodeData(value, sensorId, encoded_sensor_values);
     
+    //sendEvent("encoded.sensor.data",encoded_sensor_values[0]);
+    //sendEvent("encoded.sensor.data",encoded_sensor_values[1]);
+    //sendEvent("encoded.sensor.data",encoded_sensor_values[2]);
+    sendEventSequence("encoded.sensor.data",encoded_sensor_values);
 };
 
 
@@ -525,7 +535,7 @@ function reset(){
     car.stop_engine();
     steering_angle = 0;  
     rear_steering_angle = 0;
-         
+    seeds=[];     
     //Start the Game Loop!!!!!!!
     game_loop();
 }
@@ -708,8 +718,6 @@ function update_car()
  * RAYTRACING
  * 
  */
-
-
 function generateRay(rayLength,car,raycast_origin,raycast_destiny,raycast_intersectionPoint,angleFactor){
     
     car_angle=car.body.GetAngle();
@@ -819,6 +827,20 @@ sendEvent = function (name,value) {
                     var jsessionId = randomIdentifier;                
                     var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
                     //console.log('>>>>>Sending '+jsonstr)
-                    stompClient.send("/app/event", {}, jsonstr);                    
+                    stompClient.send("/app/event", {}, jsonstr); 
+                    
+                }
+            };
+
+sendEventSequence = function (name,values) {
+    
+                //avoid messaging when the plan has stopped (after a success exection or an error).
+                if (!plan_finished && !plan_execution_error){
+                    var jsessionId = randomIdentifier;                
+                    console.log('Sending:'+values)
+                    for (i=0;i<values.length;i++){
+                        var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[i]});
+                        stompClient.send("/app/event", {}, jsonstr); 
+                    }
                 }
             };

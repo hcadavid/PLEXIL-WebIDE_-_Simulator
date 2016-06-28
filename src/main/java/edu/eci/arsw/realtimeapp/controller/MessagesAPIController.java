@@ -232,7 +232,7 @@ public class MessagesAPIController {
 
     @MessageMapping("/event") 
     public void receiveEvent(SimpMessageHeaderAccessor headerAccessor,RobotEvent re) {
-        //System.out.println("FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re);
+        //System.out.println("[SERVER-SIDE] FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re.getValue());
         if (re.getName().equals("encoded.sensor.data")){
             try {
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                

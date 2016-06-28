@@ -58,7 +58,7 @@ encodeData=function(value,sensorId,out){
     checkcode=parity1(value);
         
     out[2]= out3 | checkcode;    
-}
+};
 
 
 

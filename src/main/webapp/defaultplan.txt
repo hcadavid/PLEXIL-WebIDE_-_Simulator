@@ -1,3 +1,5 @@
+Date Lookup time;
+
 //Set front wheels angle [-30..30]
 Command TurnFrontWheels(Integer);
 
@@ -9,6 +11,14 @@ Command MoveForward(Integer);
 
 //Move backwards with a given power level [0..100]
 Command MoveBackward(Integer); 
+
+Command MoveSprinklerToLeft();
+
+Command MoveSprinklerToRight();
+
+Command OpenSprinkler();
+
+Command CloseSprinkler();
 
 //Stop
 Command Stop();
@@ -22,15 +32,41 @@ ObstacleAvoid:
   Integer steps=0;
 
   Concurrence{    
-        
-    MF:{            
-        MoveForward(3);
-        TurnFrontWheels(30);
-    }   
 
-    StraightAt45:{
-        Start Lookup(Heading)==45;
-        TurnFrontWheels(0);
+    Duration delay1 = Duration ("PT3S"); 
+    Duration tolerance = Duration ("PT0.1S");
+    Integer currentAngle=0;
+    Boolean timingComplete=false;
+
+
+    StartMoving:{
+        MoveForward(30);     
     }
+    
+    TimedDistance:{
+        Repeat true;  
+        Wait (delay1), tolerance;            
+        pprint ("Time completed");
+        timingComplete=true;
+    }
+
+    TurnWheelsS:{
+        Start (timingComplete==true && currentAngle==30);
+        Repeat true;
+        timingComplete=false;
+        TurnFrontWheels(0);
+        currentAngle=0;
+        OpenSprinkler();
+    }
+
+    TurnWheelsL:{
+        Start (timingComplete==true && currentAngle==0);
+        Repeat true;
+        timingComplete=false;
+        TurnFrontWheels(30);
+        currentAngle=30;
+        OpenSprinkler();
+    }
+
   }
 }
