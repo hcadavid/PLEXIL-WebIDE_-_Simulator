@@ -253,7 +253,7 @@ public class MessagesAPIController {
     
     @MessageMapping("/encodedevent") 
     public void receiveEncodedEvent(SimpMessageHeaderAccessor headerAccessor,EncodedRobotEvent re) {
-        System.out.println("[SERVER-SIDE] FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re.getValues());
+        //System.out.println("[SERVER-SIDE] FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re.getValues());
         if (re.getName().equals("encoded.sensor.data")){
             try {                
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                

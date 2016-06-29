@@ -832,21 +832,6 @@ sendEvent = function (name,value) {
                 }
             };
 
-sendEventSequence = function (name,values) {
-    
-                //avoid messaging when the plan has stopped (after a success exection or an error).
-                if (!plan_finished && !plan_execution_error){
-                    var jsessionId = randomIdentifier;                
-                    console.log('Sending:'+values);
-                    var part1=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[0]});
-                    var part2=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[1]});
-                    var part3=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[2]});
-
-                    stompClient.send("/app/event", {}, part1);                     
-                    stompClient.send("/app/event", {}, part2); 
-                    stompClient.send("/app/event", {}, part3); 
-                }
-            };
 
 sendEncodedEvent = function (name,values) {
     

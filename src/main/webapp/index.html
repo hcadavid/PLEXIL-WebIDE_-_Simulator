@@ -104,16 +104,19 @@
                     </li>
                     <li class='sub-menu'> <a href="#">Plexil Plan<i class='fa fa-angle-down'></i></a>
                         <ul>
-                            <li><a href="#">Check syntax</a></li>
-                            <li><a href="#">Execute</a></li>
-                            <li><a href="#">Abort execution</a></li>
+                            <li><a href="#" onclick="compile()">Check syntax</a></li>
+                            <li><a href="#" onclick="execute()">Execute</a></li>
+                            <li><a href="#" onclick="abort()">Abort execution</a></li>
+                            <li><a href="#" onclick="abort();reset()">Environment reset</a></li>
                         </ul>
                     </li>                                        
-                    <li><a href="#">About</a></li>
+                    <li><a  id="aboutdialog" href="#">About</a></li>
+                     
                 </ul>
             </div>
         </nav>
-
+        
+        
         <div hidden>
             <input id="fileInput"  type="file" required="required" />
             <script>
@@ -181,7 +184,21 @@
 
             </p>
         </div>        
-
+        
+        <div id="dialog-message" title="Plexil simulation testbed - Alpha version (2015-2016)">
+          <p>
+            <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+            H&eacute;ctor Fabio Cadavid Rengifo 
+          </p>
+          <p>
+            Escuela Colombiana de Ingenier&iacute;a, Bogot&aacute; , Colombia.
+          </p>
+          
+          <p>              
+              Contact: <a href="mailto:hector.cadavid@escuelaing.edu.co" >hector.cadavid@escuelaing.edu.co</a>
+          </p>
+        </div>
+        
 
         <script>
            
@@ -217,7 +234,28 @@
             };
 
 
-            
+            $(function() {
+              // this initializes the dialog (and uses some common options that I do)
+              $( "#dialog-message" ).dialog({
+                  autoOpen : false,
+                  width: 700,
+                  modal: true,
+                  buttons: {
+                    Ok: function() {
+                      $( this ).dialog( "close" );
+                    }
+                  }
+                });
+
+              // next add the onclick handler
+              $("#aboutdialog").click(function() {
+                $("#dialog-message").dialog("open");
+                return false;
+              });
+            });
+
+        
+    
             function readSingleFile(e) {
               var file = e.target.files[0];
               if (!file) {
