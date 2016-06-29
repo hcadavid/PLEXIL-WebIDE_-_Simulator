@@ -488,7 +488,7 @@ var encodeAndSend = function (sensorId, value) {
     //sendEvent("encoded.sensor.data",encoded_sensor_values[0]);
     //sendEvent("encoded.sensor.data",encoded_sensor_values[1]);
     //sendEvent("encoded.sensor.data",encoded_sensor_values[2]);
-    sendEventSequence("encoded.sensor.data",encoded_sensor_values);
+    sendEncodedEvent("encoded.sensor.data",encoded_sensor_values);
 };
 
 
@@ -774,7 +774,7 @@ var stompClient = Stomp.over(socket);
 // Callback function to be called when stomp client is connected to server
 var connectCallback = function () {
     
-    stompClient.subscribe('/topic/command/'+randomIdentifier,
+    stompClient.subscribe('/queue/command/'+randomIdentifier,
             function (data) {
                 //console.log("GOT COMMAND:" + data);
                 var message=JSON.parse(data.body);                
@@ -785,7 +785,7 @@ var connectCallback = function () {
             }
     );
     
-    stompClient.subscribe('/topic/messages/'+randomIdentifier,
+    stompClient.subscribe('/queue/messages/'+randomIdentifier,
             function (data) {
                 //console.log("got message:" + data);
                 var message=JSON.parse(data.body); 
@@ -837,10 +837,26 @@ sendEventSequence = function (name,values) {
                 //avoid messaging when the plan has stopped (after a success exection or an error).
                 if (!plan_finished && !plan_execution_error){
                     var jsessionId = randomIdentifier;                
-                    console.log('Sending:'+values)
-                    for (i=0;i<values.length;i++){
-                        var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[i]});
-                        stompClient.send("/app/event", {}, jsonstr); 
-                    }
+                    console.log('Sending:'+values);
+                    var part1=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[0]});
+                    var part2=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[1]});
+                    var part3=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':values[2]});
+
+                    stompClient.send("/app/event", {}, part1);                     
+                    stompClient.send("/app/event", {}, part2); 
+                    stompClient.send("/app/event", {}, part3); 
                 }
             };
+
+sendEncodedEvent = function (name,values) {
+    
+                //avoid messaging when the plan has stopped (after a success exection or an error).
+                if (!plan_finished && !plan_execution_error){
+                    var jsessionId = randomIdentifier;                
+                    console.log('Sending:'+values);
+                    var part1=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'values':[values[0],values[1],values[2]]});
+                    
+                    stompClient.send("/app/encodedevent", {}, part1);                     
+                }
+            };
+

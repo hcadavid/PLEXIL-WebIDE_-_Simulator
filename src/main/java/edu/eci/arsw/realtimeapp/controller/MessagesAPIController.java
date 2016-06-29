@@ -8,6 +8,7 @@ import edu.eci.arsw.realtimeapp.interop.PlexilCompiler;
 import edu.eci.arsw.realtimeapp.interop.PlexilExecLauncher;
 import edu.eci.arsw.realtimeapp.interop.ProcessKillException;
 import edu.eci.arsw.realtimeapp.model.Command;
+import edu.eci.arsw.realtimeapp.model.EncodedRobotEvent;
 import edu.eci.arsw.realtimeapp.model.ExecutionRequest;
 import edu.eci.arsw.realtimeapp.model.Message;
 import edu.eci.arsw.realtimeapp.model.RobotEvent;
@@ -111,7 +112,7 @@ public class MessagesAPIController {
     @MessageMapping("/rutaMensajesEntrantes") 
     public void webSocketMsgHandler(Message m) {
         System.out.println(">>>>>>"+m.getBody());
-        template.convertAndSend("/topic/newmessage", new Command(m.getBody()));
+        template.convertAndSend("/queue/newmessage", new Command(m.getBody()));
     }
     
     /**
@@ -166,14 +167,14 @@ public class MessagesAPIController {
                     new CommandReceivedCallback() {
                         @Override
                         public void execute(String cmd) {
-                            System.out.println("Sending command:" + cmd+" to /topic/command/"+er.getClientSessionId());                                   
-                            template.convertAndSend("/topic/command/"+er.getClientSessionId(), new Command(cmd));
+                            System.out.println("Sending command:" + cmd+" to /queue/command/"+er.getClientSessionId());                                   
+                            template.convertAndSend("/queue/command/"+er.getClientSessionId(), new Command(cmd));
                         }
                     },
                     new FinishedPlanCallback() {
                         @Override
                         public void execute() {
-                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution success.",Message.PLAN_SUCCESS));            
+                            template.convertAndSend("/queue/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution success.",Message.PLAN_SUCCESS));            
                             /*try {
                                 openOutputStreams.get(er.getClientSessionId()).close();
                             } catch (IOException ex) {
@@ -184,7 +185,7 @@ public class MessagesAPIController {
                     new PlanExecutionFailureCallback() {
                         @Override
                         public void execute(String msg) {
-                            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg,Message.PLAN_EXECUTION_ERROR));            
+                            template.convertAndSend("/queue/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg,Message.PLAN_EXECUTION_ERROR));            
                         }
                     });  
             System.out.println(">>>> PROCESS CREATED "+getPidOfProcess(p));
@@ -197,7 +198,7 @@ public class MessagesAPIController {
             
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
+            template.convertAndSend("/queue/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
         } catch (IOException ex) {
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -221,10 +222,10 @@ public class MessagesAPIController {
         }
         try {
             PlexilCompiler.getInstance().compile(env.getProperty("plexilhome"),srcFile);
-            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, "Compilation success.",Message.COMPILATION_SUCCES));            
+            template.convertAndSend("/queue/messages/"+er.getClientSessionId(), new Message(sessionId, "Compilation success.",Message.COMPILATION_SUCCES));            
         } catch (CompilationException ex) {            
             Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-            template.convertAndSend("/topic/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
+            template.convertAndSend("/queue/messages/"+er.getClientSessionId(), new Message(sessionId, ex.getLocalizedMessage(),Message.COMPILATION_ERROR));            
         }
         
     }
@@ -249,6 +250,30 @@ public class MessagesAPIController {
         
     }    
     
+    
+    @MessageMapping("/encodedevent") 
+    public void receiveEncodedEvent(SimpMessageHeaderAccessor headerAccessor,EncodedRobotEvent re) {
+        System.out.println("[SERVER-SIDE] FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re.getValues());
+        if (re.getName().equals("encoded.sensor.data")){
+            try {                
+                BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
+                for (int i=0;i<re.getValues().length;i++){
+                    bw.write(re.getValues()[i]+"\n");
+                }
+                bw.flush();
+                
+            } catch (IOException ex) {
+                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            }            
+        }
+        else{
+            Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, "Unsupported event: encoded.sensor.data");
+        }
+        
+    }    
+
+
+
     
     @RequestMapping(value = "/check",method = RequestMethod.GET)        
     public String check(HttpSession session) {  
