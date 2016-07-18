@@ -12,13 +12,8 @@ Command MoveForward(Integer);
 //Move backwards with a given power level [0..100]
 Command MoveBackward(Integer); 
 
-Command MoveSprinklerToLeft();
-
-Command MoveSprinklerToRight();
-
+//apply one drop
 Command OpenSprinkler();
-
-Command CloseSprinkler();
 
 //Stop
 Command Stop();

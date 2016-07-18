@@ -93,6 +93,7 @@
                 <ul>                    
                     <li> <a href="#">File<i class='fa fa-angle-down'></i></a>
                         <ul>
+                            <li><a href="#" onclick="loadOnlinePlan('samples/defaultplan.txt')">Create new plan</a></li>
                             <li><a href="#" onclick="downloadPlan(editor.getValue(),'noname.ple','text/plain')">Save plan locally</a></li>
                             <li><a href="#" onclick="uploadPlan()">Load local plan</a></li>                            
                         </ul>
@@ -107,13 +108,22 @@
                     </li>                                        
                     <li class='sub-menu'> <a href="#">Samples<i class='fa fa-angle-down'></i></a>
                         <ul>
+                            <li><a href="#" onclick="loadOnlinePlan('samples/headingrecovery.txt')">Heading recovery</a></li>
                             <li><a href="#" onclick="loadOnlinePlan('samples/radial.txt')">Radial pesticide</a></li>
-                            <li><a href="#" onclick="loadOnlinePlan('samples/collision.txt')">Basic collision manouver</a></li>
+                            <li><a href="#" onclick="loadOnlinePlan('samples/collision.txt')">Avoid collision and stop</a></li>                            
                             
                         </ul>
                     </li>                                        
+                    
+                    <li class='sub-menu'> <a href="#">Help<i class='fa fa-angle-down'></i></a>
+                        <ul>
+                            <li><a  id="simparams" href="#">Heading and sonar sensors parameters.</a></li>                            
+                            <li><a  id="aboutdialog" href="#">About</a></li>                            
+                        </ul>
+                    </li>                                        
 
-                    <li><a  id="aboutdialog" href="#">About</a></li>
+                    
+                    
                      
                 </ul>
             </div>
@@ -201,6 +211,29 @@
               Contact: <a href="mailto:hector.cadavid@escuelaing.edu.co" >hector.cadavid@escuelaing.edu.co</a>
           </p>
         </div>
+
+        <div id="basic-help" title="Simulated robot specs.">
+            
+            <div>
+                Sonar sensor range: 400cm. Unit: Centimeters. Environment variables: 
+                <ul>
+                    <li>LeftSonarMeasuredDistance</li>
+                    <li>CenterSonarMeasuredDistance</li>
+                    <li>RightSonarMeasuredDistance</li>
+                </ul>
+                Heading (compass-based angle) unit: Degrees. Environment variables: 
+                <ul>                    
+                    <li>Heading</li>    
+                </ul>
+                
+            </div>
+
+
+          <p>
+              <img src="img/specs.png" alt="Sim Specs" width="600">
+          </p>
+        </div>
+
         
 
         <script>
@@ -261,7 +294,28 @@
               });
             });
 
-        
+
+              $(function() {
+              // this initializes the dialog (and uses some common options that I do)
+              $( "#basic-help" ).dialog({
+                  autoOpen : false,
+                  width: 700,
+                  modal: true,
+                  buttons: {
+                    Ok: function() {
+                      $( this ).dialog( "close" );
+                    }
+                  }
+                });
+
+              // next add the onclick handler
+              $("#simparams").click(function() {
+                $("#basic-help").dialog("open");
+                return false;
+              });
+            });
+
+    
     
             function readSingleFile(e) {
               var file = e.target.files[0];

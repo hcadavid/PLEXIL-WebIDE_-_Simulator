@@ -14,8 +14,7 @@ Command MoveBackward(Integer);
 
 //apply one drop
 Command OpenSprinkler();
-
-
+ 
 //Stop
 Command Stop();
 
@@ -32,54 +31,59 @@ Command pprint(...);
 
 //EXAMPLE
 
-ObstacleAvoid:
+ObstacleAvoidAndHeadRecovery:
 {
   Integer steps=0;
 
   Concurrence{    
 
     Duration delay1 = Duration ("PT3S"); 
+    Duration headFixDelay = Duration ("PT3S"); 
+    
     Duration tolerance = Duration ("PT0.1S");
     Integer currentAngle=0;
     Boolean timingComplete=false;
     Boolean obstacleAhead=false;
-    Boolean stopRequested=false;
-
+    Boolean headRecoveryRequired=false;
 
     StartMoving:{
         MoveForward(30);     
     }
     
-    TimedDistance:{
-        Repeat true;  
-        Wait (delay1), tolerance;            
-        pprint ("Time completed");
-        timingComplete=true;
-    }
-
     Colission:{
         Start Lookup(CenterSonarMeasuredDistance)<200;
         Repeat true;
         obstacleAhead=true;
     }
-
+    
     FrontalObstacleManouver:{
         Start obstacleAhead;
         Sequence{
             TurnFrontWheels(30);
             Wait (delay1), tolerance;            
             TurnFrontWheels(0);
-            Wait (delay1), tolerance;     
-            stopRequested=true;
+            Wait (delay1), tolerance;                        
+            headRecoveryRequired=true;
+            
         }
     }
-
-    Stop:{
-        Start stopRequested;
-        Stop();
+    
+    HeadingLeftFix:{
+        Start headRecoveryRequired && Lookup(Heading)<90  && Lookup(Heading)>=0;
+        Repeat true;
+        TurnFrontWheels(-15);
+        Wait (headFixDelay), tolerance;
+        TurnFrontWheels(0);
     }
 
+    HeadingRightFix:{
+        Start headRecoveryRequired &&  Lookup(Heading)>90 && Lookup(Heading)<180;
+        Repeat true;
+        TurnFrontWheels(15);
+        Wait (headFixDelay), tolerance;
+        TurnFrontWheels(0);
+    }
+    
 
   }
 }
-
