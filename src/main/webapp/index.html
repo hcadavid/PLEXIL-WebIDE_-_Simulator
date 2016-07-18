@@ -65,12 +65,7 @@
                 console.log('Sending abort message!');
                 stompClient.send("/app/abort", {}, jsonstr);                
             };
-            
-            reset = function()
-            {
-                
-            };
-            
+                        
             function goodbye(e) {
                 if (!e)
                     e = window.event;
@@ -110,6 +105,14 @@
                             <li><a href="#" onclick="abort();reset()">Environment reset</a></li>
                         </ul>
                     </li>                                        
+                    <li class='sub-menu'> <a href="#">Samples<i class='fa fa-angle-down'></i></a>
+                        <ul>
+                            <li><a href="#" onclick="loadOnlinePlan('samples/radial.txt')">Radial pesticide</a></li>
+                            <li><a href="#" onclick="loadOnlinePlan('samples/collision.txt')">Basic collision manouver</a></li>
+                            
+                        </ul>
+                    </li>                                        
+
                     <li><a  id="aboutdialog" href="#">About</a></li>
                      
                 </ul>
@@ -220,11 +223,14 @@
             editor.setTheme("ace/theme/twilight");
             editor.getSession().setMode("ace/mode/java");
 
-            $.get('defaultplan.txt',function(data){
-                editor.setValue(data);
-                editor.gotoLine(1);
-            });
-            
+            loadOnlinePlan = function(planPath){
+                $.get(planPath,function(data){
+                    editor.setValue(data);
+                    editor.gotoLine(1);
+                });                
+            }
+
+            loadOnlinePlan('samples/defaultplan.txt');
 
             $('#errors').dialog({autoOpen: false});
 
@@ -233,6 +239,7 @@
                 $('#errors').dialog('open');
             };
 
+            
 
             $(function() {
               // this initializes the dialog (and uses some common options that I do)

@@ -59,11 +59,18 @@ ObstacleAvoid:
         timingComplete=true;
     }
 
+    Colission:{
+        Start Lookup(CenterSonarMeasuredDistance)<10;
+        Repeat true;
+        TurnFrontWheels(30);
+        pprint ("Collision!!");
+    }
+
     TurnWheelsS:{
         Start (timingComplete==true && currentAngle==30);
         Repeat true;
         timingComplete=false;
-        TurnFrontWheels(0);
+        //TurnFrontWheels(0);
         currentAngle=0;
         OpenSprinkler();
     }
@@ -72,10 +79,11 @@ ObstacleAvoid:
         Start (timingComplete==true && currentAngle==0);
         Repeat true;
         timingComplete=false;
-        TurnFrontWheels(30);
+        //TurnFrontWheels(30);
         currentAngle=30;
         OpenSprinkler();
     }
 
   }
 }
+

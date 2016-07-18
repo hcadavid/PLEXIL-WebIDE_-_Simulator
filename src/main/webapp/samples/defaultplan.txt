@@ -1,0 +1,40 @@
+Date Lookup time;
+
+//Set front wheels angle [-30..30]
+Command TurnFrontWheels(Integer);
+
+//Set rear wheels angle [-30..30]
+Command TurnRearWheels(Integer); 
+
+//Move forward with a given power level [0..100]
+Command MoveForward(Integer); 
+
+//Move backwards with a given power level [0..100]
+Command MoveBackward(Integer); 
+
+Command MoveSprinklerToLeft();
+
+Command MoveSprinklerToRight();
+
+Command OpenSprinkler();
+
+Command CloseSprinkler();
+
+//Stop
+Command Stop();
+
+Command pprint(...);
+
+//*** Available Lookup Status Variables
+//Heading
+//StartRequested
+//AbortRequested
+//LeftSonarMeasuredDistance
+//RightSonarMeasuredDistance
+//CenterSonarMeasuredDistance
+
+
+EmptyPlan:
+{ 
+
+}

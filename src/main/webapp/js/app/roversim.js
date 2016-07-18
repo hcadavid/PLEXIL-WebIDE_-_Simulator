@@ -8,7 +8,10 @@
  Original sources: Racing car example, author: Silver Moon (m00n.silv3r@gmail.com)
  */
 
-var randomIdentifier=Math.random().toString(36).slice(2);
+var randomIdentifier;
+var stompClient;
+
+var loopTimeout;
 
 var obstacles=[];
 var seeds=[];
@@ -41,7 +44,8 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
 
 
 var plan_finished=false;
-var plan_execution_error=false;
+//var plan_execution_error=false;
+
 
 var center_car_raycast_origin = new b2Vec2( 0,0);
 var center_car_raycast_destiny = new b2Vec2();
@@ -55,13 +59,13 @@ var right_car_raycast_origin = new b2Vec2( 0,0);
 var right_car_raycast_destiny = new b2Vec2();
 var right_car_raycast_intersectionPoint=new b2Vec2();
 
-var closest_right_obstacle=1;
-var closest_left_obstacle=1;
-var closest_center_obstacle=1;
+var closest_right_obstacle=Number.MAX_VALUE;
+var closest_left_obstacle=Number.MAX_VALUE;
+var closest_center_obstacle=Number.MAX_VALUE;
 
-var last_known_closest_right_obstacle=1;
-var last_known_closest_left_obstacle=1;
-var last_known_closest_center_obstacle=1;
+var last_known_closest_right_obstacle=Number.MAX_VALUE;
+var last_known_closest_left_obstacle=Number.MAX_VALUE;
+var last_known_closest_center_obstacle=Number.MAX_VALUE;
 
 var current_heading=0;
 var last_known_heading=0;
@@ -445,20 +449,25 @@ function game_loop()
         last_known_closest_right_obstacle=closest_right_obstacle;
         console.log("Encoding and sending:"+(closest_right_obstacle*proximity_sensor_range));
     }
+    
     if (closest_center_obstacle!==last_known_closest_center_obstacle){
         encodeAndSend(CENTER_SENSOR_ID,Math.floor(closest_center_obstacle*proximity_sensor_range));
         last_known_closest_center_obstacle=closest_center_obstacle;
         console.log("CENTER obstacle at:"+(closest_center_obstacle*proximity_sensor_range));
     }
+    //else{
+    //    console.log("NO CENTER obstacle");
+    //    console.log(closest_left_obstacle+","+last_known_closest_left_obstacle);
+    //}
     
     current_heading=car.body.GetAngle();
     
     if (Math.abs(current_heading-last_known_heading)>0.001){
         last_known_heading=current_heading;
-        if (communication_channel_ready){
-            encodeAndSend(HEADING_ID,Math.abs(Math.round(((current_heading*(180/Math.PI))%360))));
+        
+        encodeAndSend(HEADING_ID,Math.abs(Math.round(((current_heading*(180/Math.PI))%360))));
             //console.log("Sending:"+Math.round(((current_heading*(180/Math.PI))%360)));
-        } 
+         
     }
     
     
@@ -478,17 +487,19 @@ function game_loop()
     redraw_world(world, ctx);
 
     //call this function again after 10 seconds
-    setTimeout('game_loop()', 2000 / 60);
+    loopTimeout=setTimeout('game_loop()', 2000 / 60);
 }
 
 var encodeAndSend = function (sensorId, value) {
-    var encoded_sensor_values = [];
-    encodeData(value, sensorId, encoded_sensor_values);
-    
-    //sendEvent("encoded.sensor.data",encoded_sensor_values[0]);
-    //sendEvent("encoded.sensor.data",encoded_sensor_values[1]);
-    //sendEvent("encoded.sensor.data",encoded_sensor_values[2]);
-    sendEncodedEvent("encoded.sensor.data",encoded_sensor_values);
+    if (communication_channel_ready){
+        var encoded_sensor_values = [];
+        encodeData(value, sensorId, encoded_sensor_values);
+
+        sendEncodedEvent("encoded.sensor.data",encoded_sensor_values);
+    }
+    else{
+        console.log("Channel not ready. Skipping transmission of "+value);
+    }
 };
 
 
@@ -515,8 +526,23 @@ $(function ()
 
 
 function reset(){
+
+    clearTimeout(loopTimeout);
+    console.log('resetting');    
     
-    
+    communication_channel_ready = false;
+
+    closest_right_obstacle=Number.MAX_VALUE;
+    closest_left_obstacle=Number.MAX_VALUE;
+    closest_center_obstacle=Number.MAX_VALUE;
+
+    last_known_closest_right_obstacle=Number.MAX_VALUE;
+    last_known_closest_left_obstacle=Number.MAX_VALUE;
+    last_known_closest_center_obstacle=Number.MAX_VALUE;
+
+    current_heading=0;
+    last_known_heading=0;
+
     game.ctx = ctx = $('#canvas').get(0).getContext('2d');
     var canvas = $('#canvas');
     
@@ -536,8 +562,16 @@ function reset(){
     steering_angle = 0;  
     rear_steering_angle = 0;
     seeds=[];     
+
+    plan_finished=false;
+    //plan_execution_error=false;
+    
+    wsconnect();
+    
     //Start the Game Loop!!!!!!!
     game_loop();
+    
+    
 }
 
 
@@ -767,81 +801,105 @@ function generateRay(rayLength,car,raycast_origin,raycast_destiny,raycast_inters
 
 /*----------------------------*/
 
+function generateUUID(){
+    var d = new Date().getTime();
+    if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now(); //use high-precision timer if available
+    }
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+}
 
-var socket = new SockJS("/roversim/sockets/ws");
-var stompClient = Stomp.over(socket);
 
-// Callback function to be called when stomp client is connected to server
-var connectCallback = function () {
+wsconnect = function(){
     
-    stompClient.subscribe('/queue/command/'+randomIdentifier,
-            function (data) {
-                //console.log("GOT COMMAND:" + data);
-                var message=JSON.parse(data.body);                
-                game.rover_commands(message.commandCode);
-                
-                //var message = JSON.parse(data.body);
-                //console.log("got:" + message.destiny + "," + message.body);
-            }
-    );
+    randomIdentifier=generateUUID();
     
-    stompClient.subscribe('/queue/messages/'+randomIdentifier,
-            function (data) {
-                //console.log("got message:" + data);
-                var message=JSON.parse(data.body); 
-                
-                showError(message.body);                
-                
-                if (message.messageId===3){
-                    console.log(">>>>>> Plan is finshed");
-                    plan_finished=true;
+    var socket = new SockJS("/roversim/sockets/ws");
+    stompClient = Stomp.over(socket);
+
+    // Callback function to be called when stomp client is connected to server
+    var connectCallback = function () {
+
+        stompClient.subscribe('/queue/command/'+randomIdentifier,
+                function (data) {
+                    //console.log("GOT COMMAND:" + data);
+                    var message=JSON.parse(data.body);                
+                    game.rover_commands(message.commandCode);
+
+                    //var message = JSON.parse(data.body);
+                    //console.log("got:" + message.destiny + "," + message.body);
                 }
-                else if (message.messageId===2){
-                    plan_execution_error=true;
-                }
+        );
 
-                //game.rover_commands(message.commandCode);
-                
-                //var message = JSON.parse(data.body);
-                //console.log("got:" + message.destiny + "," + message.body);
-            }
-    ); 
-    
-    communication_channel_ready = true;
+        stompClient.subscribe('/queue/messages/'+randomIdentifier,
+                function (data) {
+                    //console.log("got message:" + data);
+                    var message=JSON.parse(data.body); 
+
+                    showError(message.body);                
+
+                    if (message.messageId===3){
+                        console.log(">>>>>> Plan is finshed");
+                        plan_finished=true;
+                    }
+                    else if (message.messageId===2){
+                        //plan_execution_error=true;
+                    }
+
+                    //game.rover_commands(message.commandCode);
+
+                    //var message = JSON.parse(data.body);
+                    //console.log("got:" + message.destiny + "," + message.body);
+                }
+        ); 
+
+        communication_channel_ready = true;
+
+    };
+
+    // Callback function to be called when stomp client could not connect to server
+    var errorCallback = function (error) {
+        alert(error.headers.message);
+    };
+
+    // Connect to server via websocket
+    stompClient.connect("guest", "guest", connectCallback, errorCallback);
+
+
+    sendEvent = function (name,value) {
+
+                    //avoid messaging when the plan has stopped (after a success exection or an error).
+                    if (!plan_finished /*&& !plan_execution_error*/){
+                        var jsessionId = randomIdentifier;                
+                        var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
+                        //console.log('>>>>>Sending '+jsonstr)
+                        stompClient.send("/app/event", {}, jsonstr); 
+
+                    }
+                };
+
+
+    sendEncodedEvent = function (name,values) {
+
+                    //avoid messaging when the plan has stopped (after a success exection or an error).                    
+                    if (!plan_finished /*&& !plan_execution_error*/){
+                        var jsessionId = randomIdentifier;                
+                        //console.log('Sending:'+values);
+                        var part1=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'values':[values[0],values[1],values[2]]});
+
+                        stompClient.send("/app/encodedevent", {}, part1); 
+                        console.log('Sending encoded data '+part1)
+                    }
+                };
+
     
 };
 
-// Callback function to be called when stomp client could not connect to server
-var errorCallback = function (error) {
-    alert(error.headers.message);
-};
 
-// Connect to server via websocket
-stompClient.connect("guest", "guest", connectCallback, errorCallback);
-
-
-sendEvent = function (name,value) {
-    
-                //avoid messaging when the plan has stopped (after a success exection or an error).
-                if (!plan_finished && !plan_execution_error){
-                    var jsessionId = randomIdentifier;                
-                    var jsonstr = JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'value':value});
-                    //console.log('>>>>>Sending '+jsonstr)
-                    stompClient.send("/app/event", {}, jsonstr); 
-                    
-                }
-            };
-
-
-sendEncodedEvent = function (name,values) {
-    
-                //avoid messaging when the plan has stopped (after a success exection or an error).
-                if (!plan_finished && !plan_execution_error){
-                    var jsessionId = randomIdentifier;                
-                    console.log('Sending:'+values);
-                    var part1=JSON.stringify({'clientSessionId': jsessionId, 'name': name, 'values':[values[0],values[1],values[2]]});
-                    
-                    stompClient.send("/app/encodedevent", {}, part1);                     
-                }
-            };
+wsconnect();
 

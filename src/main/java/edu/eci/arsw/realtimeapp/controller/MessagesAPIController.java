@@ -146,7 +146,7 @@ public class MessagesAPIController {
     @MessageMapping("/execute") 
     public void execute(SimpMessageHeaderAccessor headerAccessor,final ExecutionRequest er) {
         System.out.println("GOT EXECUTE COMMAND FROM "+er.getClientSessionId());
-        final String sessionId = headerAccessor.getSessionId(); // Session ID
+        final String sessionId = er.getClientSessionId();
         //random file name
         String srcSuffix=sessionId+System.currentTimeMillis();
         String srcFile="/tmp/"+srcSuffix+".ple";
@@ -210,7 +210,7 @@ public class MessagesAPIController {
     @MessageMapping("/compile") 
     public void compile(SimpMessageHeaderAccessor headerAccessor,ExecutionRequest er) {
         System.out.println("GOT EXECUTE COMMAND FROM "+er.getClientSessionId());
-        String sessionId = headerAccessor.getSessionId(); // Session ID
+        String sessionId = er.getClientSessionId();
         //random file name
         String srcFile="/tmp/"+sessionId+System.currentTimeMillis()+".ple";
         try {
@@ -253,7 +253,7 @@ public class MessagesAPIController {
     
     @MessageMapping("/encodedevent") 
     public void receiveEncodedEvent(SimpMessageHeaderAccessor headerAccessor,EncodedRobotEvent re) {
-        //System.out.println("[SERVER-SIDE] FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re.getValues());
+        System.out.println("[SERVER-SIDE] FORWARDING EVENT FROM "+re.getClientSessionId()+" to PLEXIL UE:"+re.getValues());
         if (re.getName().equals("encoded.sensor.data")){
             try {                
                 BufferedWriter bw=openOutputStreamsWriters.get(re.getClientSessionId());                
