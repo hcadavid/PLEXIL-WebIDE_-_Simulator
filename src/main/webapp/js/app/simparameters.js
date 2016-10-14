@@ -1,6 +1,6 @@
 var carxpos=1;
 var carypos=3;
-var initialCarAngle=-1.80;
+var initialCarAngle=-1.8;
 
 //centimeters
 var proximity_sensor_range=400;

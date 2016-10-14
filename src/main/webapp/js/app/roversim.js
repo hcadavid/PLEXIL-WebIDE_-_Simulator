@@ -461,12 +461,17 @@ function game_loop()
     //}
     
     current_heading=car.body.GetAngle();
+    //console.log("Sending:"+car.body.GetAngle());
     
     if (Math.abs(current_heading-last_known_heading)>0.001){
         last_known_heading=current_heading;
-        
+                
+        if (current_heading<0){
+            current_heading=(2*Math.PI)+current_heading;
+        }
         encodeAndSend(HEADING_ID,Math.abs(Math.round(((current_heading*(180/Math.PI))%360))));
-            //console.log("Sending:"+Math.round(((current_heading*(180/Math.PI))%360)));
+        console.log("Sending:"+Math.abs(Math.round(((current_heading*(180/Math.PI))%360))));
+        //console.log("Sending:"+current_heading);
          
     }
     
