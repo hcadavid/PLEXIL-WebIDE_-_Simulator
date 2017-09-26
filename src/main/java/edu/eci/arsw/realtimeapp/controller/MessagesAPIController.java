@@ -78,37 +78,9 @@ public class MessagesAPIController {
         openOutputStreamsWriters=new ConcurrentHashMap<>();
         processesMap=new ConcurrentHashMap<>();
         processesIdMap=new ConcurrentHashMap<>();
-        /*new Thread(){
-            public void run(){
-                while (true) {
-                    System.out.println("Message send attempt...");
-                    try {
-                        Thread.sleep(5000);
-                        if (template != null) {
-                            template.convertAndSend("/topic/newmessage", new Command("38"));
-                            Thread.sleep(1000);
-                            template.convertAndSend("/topic/newmessage", new Command("83"));
-
-                        }
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                    
-                }
-            }            
-        }.start();*/
     }
     
-        
-    
-    /*@MessageMapping("/rutaMensajesEntrantes") 
-    public void webSocketMsgHandler(RobotEvent m) {
-     System.out.println(">>>>>>"+m);
-    }*/
-    
-    
-        
+                    
     @MessageMapping("/rutaMensajesEntrantes") 
     public void webSocketMsgHandler(Message m) {
         System.out.println(">>>>>>"+m.getBody());
@@ -175,11 +147,6 @@ public class MessagesAPIController {
                         @Override
                         public void execute() {
                             template.convertAndSend("/queue/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution success.",Message.PLAN_SUCCESS));            
-                            /*try {
-                                openOutputStreams.get(er.getClientSessionId()).close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(MessagesAPIController.class.getName()).log(Level.SEVERE, null, ex);
-                            }*/
                         }
                     },
                     new PlanExecutionFailureCallback() {
@@ -188,7 +155,7 @@ public class MessagesAPIController {
                             template.convertAndSend("/queue/messages/"+er.getClientSessionId(), new Message(sessionId, "Plan execution failed:"+msg,Message.PLAN_EXECUTION_ERROR));            
                         }
                     });  
-            System.out.println(">>>> PROCESS CREATED "+getPidOfProcess(p));
+            //System.out.println(">>>> PROCESS CREATED "+getPidOfProcess(p));
             
             OutputStream os=p.getOutputStream();
             openOutputStreams.put(er.getClientSessionId(), os);
@@ -271,9 +238,6 @@ public class MessagesAPIController {
         }
         
     }    
-
-
-
     
     @RequestMapping(value = "/check",method = RequestMethod.GET)        
     public String check(HttpSession session) {  
