@@ -130,10 +130,11 @@ public class PlexilCompiler {
         
     }
 
+    /*
     public static void main(String args[]) throws IOException, CompilationException {
         PlexilCompiler.getInstance().compile("/Users/hcadavid/apps/plexil-4.0.1","/tmp/CommandsExample.ple");
         System.out.println("done");
-    }
+    }*/
 
 }
 
