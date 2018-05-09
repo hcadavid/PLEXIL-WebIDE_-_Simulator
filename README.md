@@ -1,5 +1,7 @@
 ### A  full-featured,  Web-based  -and  thus  multi-platform- development  and  simulation  environment  for  PLEXIL-based automation plans.
 
+[![DOI](https://zenodo.org/badge/104826783.svg)](https://zenodo.org/badge/latestdoi/104826783)
+
 [Reference paper.](https://www.researchgate.net/publication/312485885_Hardware_and_software_architecture_for_Plexil-based_simulation_supported_robot_automation)
 
 #### Online Editor and compiler
