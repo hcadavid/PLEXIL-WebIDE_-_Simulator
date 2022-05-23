@@ -12,4 +12,4 @@
 ![](img/Screenshot2.png)
 ![](img/Simulation_environment_for_Plexilbased_robot_automation_pla.gif)
 
-This project requires a working copy of [PLEXIL 4.0.1](https://sourceforge.net/projects/plexil/files/latest/download) installed and configured in the server, with a [custom PLEXIL adapter available here](https://github.com/hcadavid/ROSAdapter4Plexil).
+This project requires a working copy of [PLEXIL 4.0.1](https://sourceforge.net/projects/plexil/files/latest/download) installed and configured in the server, with a custom plexil adapter.
