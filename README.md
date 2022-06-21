@@ -1,4 +1,4 @@
-### A  full-featured,  Web-based  -and  thus  multi-platform- development  and  simulation  environment  for  PLEXIL-based automation plans.
+### A  Web-based development  and  simulation  environment for PLEXIL-based automation plans
 
 [![DOI](https://zenodo.org/badge/104826783.svg)](https://zenodo.org/badge/latestdoi/104826783)
 
@@ -13,3 +13,5 @@
 ![](img/Simulation_environment_for_Plexilbased_robot_automation_pla.gif)
 
 This project requires a working copy of [PLEXIL 4.0.1](https://sourceforge.net/projects/plexil/files/latest/download) installed and configured in the server, with a custom plexil adapter.
+
+The SoC code used to run the plan in the physical rover (the six-wheel rover with a command-based RS-232 interface described in the paper), is available at https://bitbucket.org/hcadavid/soc-plexil-hardware-adapter/src/master/
